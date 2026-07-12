@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import httpx
 
 from teilauto.api.client import BASE_URL
+from teilauto.api.errors import AuthRequiredError
 from teilauto.cli import cli
 
 
@@ -27,7 +28,7 @@ def test_autobook_requires_duration(runner, logged_in):
 
 def test_autobook_requires_login(runner, isolated_config):
     result = runner.invoke(cli, ["autobook", "--for", "1h", "--yes"])
-    assert result.exception is not None
+    assert isinstance(result.exception, AuthRequiredError)
 
 
 def test_autobook_books_first_match(

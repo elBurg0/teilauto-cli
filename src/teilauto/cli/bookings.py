@@ -77,29 +77,32 @@ def show_booking(app, booking_id, as_json) -> None:
 @click.pass_obj
 def create_booking(app, car_id, start_text, duration_text, until_text, yes, as_json) -> None:
     """Book CAR_ID for a time window. Asks for confirmation — this costs money."""
+    if as_json and not yes:
+        raise click.UsageError("--json is non-interactive; add --yes to confirm the booking.")
     start, end = resolve_window(
         start_text, duration_text, until_text, default_minutes=app.settings.window_min
     )
     with app.require_auth_client() as client:
         car = client.get_car(car_id)
-        try:
-            price = client.price(car_id, start, end)
-            price_line = (
-                f"{price.total:.2f} {price.currency}" if price.total is not None else "unknown"
+        if not as_json:
+            try:
+                price = client.price(car_id, start, end)
+                price_line = (
+                    f"{price.total:.2f} {price.currency}" if price.total is not None else "unknown"
+                )
+            except TeilautoError:
+                price_line = "unknown"
+            console.print(
+                kv_panel(
+                    "Confirm booking",
+                    {
+                        "car": f"{car.name} ({car.plate or car.id})",
+                        "from": start.strftime("%Y-%m-%d %H:%M"),
+                        "until": end.strftime("%Y-%m-%d %H:%M"),
+                        "price": price_line,
+                    },
+                )
             )
-        except TeilautoError:
-            price_line = "unknown"
-        console.print(
-            kv_panel(
-                "Confirm booking",
-                {
-                    "car": f"{car.name} ({car.plate or car.id})",
-                    "from": start.strftime("%Y-%m-%d %H:%M"),
-                    "until": end.strftime("%Y-%m-%d %H:%M"),
-                    "price": price_line,
-                },
-            )
-        )
         if not yes:
             click.confirm("Book this car?", abort=True)
         booking = client.create_booking(car_id, start, end)

@@ -67,7 +67,9 @@ def car_detail(car: Car) -> Panel:
             "type": car.car_type or "—",
             "fuel": f"{car.fuel:.0f}%" if car.fuel is not None else "—",
             "address": car.address or "—",
-            "position": f"{car.lat}, {car.lng}" if car.lat is not None else "—",
+            "position": (
+                f"{car.lat}, {car.lng}" if car.lat is not None and car.lng is not None else "—"
+            ),
         },
     )
 

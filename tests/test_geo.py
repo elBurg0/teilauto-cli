@@ -8,7 +8,7 @@ def test_zero_distance():
 
 
 def test_known_distance_leipzig():
-    # Leipzig Hbf -> Augustusplatz is roughly 1.0-1.3 km
+    # Leipzig Hbf -> Augustusplatz is roughly 750 m
     d = haversine_m(51.3455, 12.3821, 51.3387, 12.3818)
     assert 700 < d < 800
 

@@ -115,7 +115,7 @@ teilauto notify test
 | `teilauto price CAR_ID` | Price of booking a car for a time window. Login required for real prices; unauthenticated requests return "unknown". |
 | `teilauto bookings list` | Your bookings (upcoming only by default). |
 | `teilauto bookings show BOOKING_ID` | One booking in detail. |
-| `teilauto bookings create CAR_ID` | Book a car for a time window (asks for confirmation). |
+| `teilauto bookings create CAR_ID` | Book a car for a time window (asks for confirmation; skip with `--yes`, required if you also pass `--json`). |
 | `teilauto bookings cancel BOOKING_ID` | Cancel a booking. |
 | `teilauto watch` | Poll for newly available cars and notify — never books. |
 | `teilauto autobook` | Poll and book the first match automatically. |

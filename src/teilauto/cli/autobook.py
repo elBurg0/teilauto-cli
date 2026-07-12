@@ -160,26 +160,27 @@ def autobook_cmd(
                 min_fuel=min_fuel,
             )
 
-        send_all(
+        for error in send_all(
             notifiers,
             "teilauto autobook",
             f"🤖 Autobook started (radius {radius_m} m, every {interval}s)",
-        )
+        ):
+            err_console.print(f"[red]notify failed:[/red] {error}")
         if not app.quiet and not as_json:
             console.print(f"Hunting for a car... polling every {interval}s. Ctrl-C to stop.")
 
         def give_up(message: str) -> None:
-            send_all(notifiers, "Autobook gave up", f"⏰ {message}")
+            for error in send_all(notifiers, "Autobook gave up", f"⏰ {message}"):
+                err_console.print(f"[red]notify failed:[/red] {error}")
             finish("no_match", None, None, None)
             raise NoMatchError(message)
 
-        def deadline_passed() -> bool:
+        def deadline_passed() -> None:
             now = datetime.now().astimezone()
             if deadline is not None and now >= deadline:
                 give_up("Deadline reached — no matching car was booked.")
             if fixed_end is not None and now >= fixed_end:
                 give_up("The --until time has passed — nothing left to book.")
-            return False
 
         deadline_passed()
 
@@ -230,7 +231,8 @@ def autobook_cmd(
                         message = f"Would have booked: {describe(ca)}{price_line}"
                         if not as_json:
                             console.print(f"[green]✓ DRY RUN[/green] {message}")
-                        send_all(notifiers, "teilauto dry-run", f"🤖 {message}")
+                        for error in send_all(notifiers, "teilauto dry-run", f"🤖 {message}"):
+                            err_console.print(f"[red]notify failed:[/red] {error}")
                         finish("dry_run", ca, None, price)
                         return
                     try:
@@ -251,7 +253,8 @@ def autobook_cmd(
                     message = f"Booked {describe(ca)}{price_line} — booking id {booking.id}"
                     if not as_json:
                         console.print(f"[green]✓ Booked![/green] {message}")
-                    send_all(notifiers, "Car booked", f"🚗 {message}")
+                    for error in send_all(notifiers, "Car booked", f"🚗 {message}"):
+                        err_console.print(f"[red]notify failed:[/red] {error}")
                     finish("booked", ca, booking, price)
                     return
             deadline_passed()

@@ -19,11 +19,12 @@ CONTEXT_SETTINGS = {"help_option_names": ["-h", "--help"]}
 
 @dataclass
 class AppContext:
-    settings: Settings
     verbose: bool = False
     quiet: bool = False
     _token: StoredToken | None = field(default=None, init=False, repr=False)
     _token_loaded: bool = field(default=False, init=False, repr=False)
+    _settings: Settings | None = field(default=None, init=False, repr=False)
+    _settings_loaded: bool = field(default=False, init=False, repr=False)
 
     @property
     def token(self) -> StoredToken | None:
@@ -31,6 +32,13 @@ class AppContext:
             self._token = tokenstore.load_token()
             self._token_loaded = True
         return self._token
+
+    @property
+    def settings(self) -> Settings:
+        if not self._settings_loaded:
+            self._settings = load_settings()
+            self._settings_loaded = True
+        return self._settings
 
     def client(self) -> CantamenClient:
         token = self.token
@@ -53,7 +61,7 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
     Search cars, check prices, manage bookings — and auto-book a car the
     moment it becomes available.
     """
-    ctx.obj = AppContext(settings=load_settings(), verbose=verbose, quiet=quiet)
+    ctx.obj = AppContext(verbose=verbose, quiet=quiet)
 
 
 from teilauto.cli.auth import auth  # noqa: E402

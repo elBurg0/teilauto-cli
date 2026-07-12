@@ -37,5 +37,5 @@ Initial public release.
   both; account passwords are never persisted.
 - CI across Linux/macOS/Windows and Python 3.10–3.14 (lint, format check,
   tests), plus a tag-triggered PyPI release workflow.
-- 132-test suite covering the API client, CLI commands, config, token
+- 140-test suite covering the API client, CLI commands, config, token
   storage, time parsing, geo, and notification services.

@@ -19,6 +19,50 @@ def _check_key(key: str) -> None:
         raise ConfigError(f"Unknown config key: {key!r}.", hint=f"Valid keys: {valid}")
 
 
+def _validate_value(key: str, value: object) -> object:
+    """Check a coerced CLI value against the DEFAULTS leaf type, converting where safe."""
+    default = cfg.get_value(cfg.DEFAULTS, key)
+    if isinstance(default, bool):
+        if not isinstance(value, bool):
+            raise ConfigError(
+                f"Invalid value for {key}: expected a boolean, got {value!r}.",
+                hint=f"`teilauto config set {key} true|false`",
+            )
+        return value
+    if isinstance(default, int):
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ConfigError(
+                f"Invalid value for {key}: expected an integer, got {value!r}.",
+                hint=f"`teilauto config set {key} <integer>`",
+            )
+        return value
+    if isinstance(default, float):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ConfigError(
+                f"Invalid value for {key}: expected a number, got {value!r}.",
+                hint=f"`teilauto config set {key} <number>`",
+            )
+        return value
+    if isinstance(default, list):
+        if not isinstance(value, (list, str)):
+            raise ConfigError(
+                f"Invalid value for {key}: expected a comma-separated list or a string, "
+                f"got {value!r}.",
+                hint=f"`teilauto config set {key} a,b,c`",
+            )
+        return value
+    if isinstance(default, str):
+        if isinstance(value, str):
+            return value
+        if isinstance(value, (int, float)) and not isinstance(value, bool):
+            return str(value)
+        raise ConfigError(
+            f"Invalid value for {key}: expected a string, got {value!r}.",
+            hint=f"`teilauto config set {key} <text>`",
+        )
+    return value
+
+
 @click.group("config")
 def config_group() -> None:
     """View and edit configuration (config file, overridable via TEILAUTO_* env vars)."""
@@ -66,10 +110,11 @@ def set_config(key: str, value: str) -> None:
         tokenstore.save_secret(SECRET_KEYS[key], value)
         console.print(f"[green]✓[/green] {key} stored securely.")
         return
+    coerced = _validate_value(key, cfg.coerce_value(value))
     data = cfg.read_raw()
-    cfg.set_value(data, key, cfg.coerce_value(value))
+    cfg.set_value(data, key, coerced)
     cfg.write_raw(data)
-    console.print(f"[green]✓[/green] {key} = {cfg.coerce_value(value)!r}")
+    console.print(f"[green]✓[/green] {key} = {coerced!r}")
 
 
 @config_group.command("unset")

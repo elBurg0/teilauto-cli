@@ -4,6 +4,7 @@ import time
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 
+from teilauto.api.errors import AuthRequiredError, ConfigError
 from teilauto.services.availability import CarAvailability
 
 
@@ -35,6 +36,8 @@ def watch(
     while True:
         try:
             cars = fetch()
+        except (AuthRequiredError, ConfigError):
+            raise
         except Exception as exc:
             yield WatchTick(nearby=0, available=0, new=(), error=str(exc))
             sleep = min(sleep * 2, max_sleep)

@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from itertools import islice
 
+import pytest
+
+from teilauto.api.errors import AuthRequiredError
 from teilauto.api.models import Car
 from teilauto.services.availability import CarAvailability
 from teilauto.services.watcher import watch
@@ -67,6 +70,15 @@ def test_backoff_doubles_and_resets():
     assert ticks[2].error == "api down"
     assert ticks[3].error is None
     assert sleeps == [10, 20, 25, 10, 10]
+
+
+def test_fatal_auth_error_is_not_swallowed():
+    def fetch():
+        raise AuthRequiredError()
+
+    gen = watch(fetch, interval=1, sleeper=lambda s: None)
+    with pytest.raises(AuthRequiredError):
+        next(gen)
 
 
 def test_error_keeps_seen_set():

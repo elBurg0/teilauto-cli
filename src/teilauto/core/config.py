@@ -118,6 +118,17 @@ def coerce_value(text: str) -> object:
     return text
 
 
+def _cast(key: str, value: object, caster):
+    try:
+        return caster(value)
+    except (TypeError, ValueError) as exc:
+        raise ConfigError(
+            f"Invalid config value for {key}: {value!r} ({exc})",
+            hint="Fix it with `teilauto config set <key> <value>` "
+            "or `teilauto config unset <key>`.",
+        ) from exc
+
+
 def _merged(path: Path | None = None) -> dict:
     merged = copy.deepcopy(DEFAULTS)
 
@@ -141,9 +152,9 @@ def _merged(path: Path | None = None) -> dict:
         elif isinstance(default, list):
             value = [part.strip() for part in raw.split(",") if part.strip()]
         elif isinstance(default, float):
-            value = float(raw)
+            value = _cast(key, raw, float)
         elif isinstance(default, int):
-            value = int(raw)
+            value = _cast(key, raw, int)
         else:
             value = raw
         set_value(merged, key, value)
@@ -176,15 +187,19 @@ def load_settings(path: Path | None = None) -> Settings:
     if isinstance(channels, str):
         channels = [channels]
     return Settings(
-        lat=float(get_value(merged, "location.lat")),
-        lng=float(get_value(merged, "location.lng")),
-        radius_m=int(get_value(merged, "location.radius_m")),
-        min_fuel=float(get_value(merged, "defaults.min_fuel")),
-        window_min=int(get_value(merged, "defaults.window_min")),
-        interval_sec=int(get_value(merged, "defaults.interval_sec")),
-        prov_id=str(get_value(merged, "api.prov_id")),
-        channels=tuple(channels or ()),
-        tg_chat_id=str(get_value(merged, "notify.telegram.chat_id") or ""),
-        ntfy_topic=str(get_value(merged, "notify.ntfy.topic") or ""),
-        ntfy_server=str(get_value(merged, "notify.ntfy.server")),
+        lat=_cast("location.lat", get_value(merged, "location.lat"), float),
+        lng=_cast("location.lng", get_value(merged, "location.lng"), float),
+        radius_m=_cast("location.radius_m", get_value(merged, "location.radius_m"), int),
+        min_fuel=_cast("defaults.min_fuel", get_value(merged, "defaults.min_fuel"), float),
+        window_min=_cast("defaults.window_min", get_value(merged, "defaults.window_min"), int),
+        interval_sec=_cast(
+            "defaults.interval_sec", get_value(merged, "defaults.interval_sec"), int
+        ),
+        prov_id=_cast("api.prov_id", get_value(merged, "api.prov_id"), str),
+        channels=_cast("notify.channels", channels or (), tuple),
+        tg_chat_id=_cast(
+            "notify.telegram.chat_id", get_value(merged, "notify.telegram.chat_id") or "", str
+        ),
+        ntfy_topic=_cast("notify.ntfy.topic", get_value(merged, "notify.ntfy.topic") or "", str),
+        ntfy_server=_cast("notify.ntfy.server", get_value(merged, "notify.ntfy.server"), str),
     )

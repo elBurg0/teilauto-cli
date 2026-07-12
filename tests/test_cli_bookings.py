@@ -66,6 +66,28 @@ def test_create_aborts_on_no(runner, logged_in, respx_mock, poi_json, prices_jso
     assert not post.called
 
 
+def test_create_json_yes_prints_single_json_document(
+    runner, logged_in, respx_mock, poi_json, prices_json, bookings_json
+):
+    bookee = poi_json[0]["places"][0]["bookees"][0] | {"place": poi_json[0]["places"][0]}
+    respx_mock.get(f"{BASE_URL}/bookees/111").mock(return_value=httpx.Response(200, json=bookee))
+    respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(200, json=prices_json))
+    post = respx_mock.post(f"{BASE_URL}/bookings").mock(
+        return_value=httpx.Response(200, json=bookings_json[0])
+    )
+    result = runner.invoke(cli, ["bookings", "create", "111", "--for", "1h", "--yes", "--json"])
+    assert result.exit_code == 0, result.output
+    assert post.called
+    data = json.loads(result.stdout)
+    assert data["id"] == "b-1"
+
+
+def test_create_json_without_yes_is_rejected(runner, logged_in):
+    result = runner.invoke(cli, ["bookings", "create", "111", "--for", "1h", "--json"])
+    assert result.exit_code == 2
+    assert "--yes" in result.stderr
+
+
 def test_cancel_with_yes(runner, logged_in, respx_mock):
     route = respx_mock.delete(f"{BASE_URL}/bookings/b-1").mock(return_value=httpx.Response(204))
     result = runner.invoke(cli, ["bookings", "cancel", "b-1", "--yes"])
