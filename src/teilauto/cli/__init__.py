@@ -62,6 +62,7 @@ from teilauto.cli.cars import cars  # noqa: E402
 from teilauto.cli.config_cmd import config_group  # noqa: E402
 from teilauto.cli.notify_cmd import notify  # noqa: E402
 from teilauto.cli.price import price  # noqa: E402
+from teilauto.cli.watch import watch_cmd  # noqa: E402
 
 cli.add_command(auth)
 cli.add_command(bookings)
@@ -69,6 +70,7 @@ cli.add_command(cars)
 cli.add_command(config_group)
 cli.add_command(notify)
 cli.add_command(price)
+cli.add_command(watch_cmd)
 
 
 def main() -> None:
