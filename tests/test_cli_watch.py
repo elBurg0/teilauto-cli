@@ -54,3 +54,15 @@ def test_watch_notifies_via_ntfy(runner, isolated_config, respx_mock, monkeypatc
     assert isinstance(result.exception, StopLoop)
     # startup message + one new car
     assert ntfy_route.call_count == 2
+
+
+def test_watch_reports_failing_startup_notification(runner, isolated_config, respx_mock,
+                                                    monkeypatch, poi_json, proposals_json,
+                                                    one_cycle):
+    monkeypatch.setenv("TEILAUTO_NOTIFY_CHANNELS", "ntfy")
+    monkeypatch.setenv("TEILAUTO_NOTIFY_NTFY_TOPIC", "t")
+    _mock_search(respx_mock, poi_json, proposals_json)
+    respx_mock.post("https://ntfy.sh/t").mock(return_value=httpx.Response(500))
+    result = runner.invoke(cli, ["watch"])
+    assert isinstance(result.exception, StopLoop)
+    assert "notify failed" in result.stderr

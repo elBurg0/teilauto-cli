@@ -54,8 +54,12 @@ def watch_cmd(app, lat, lng, radius_m, min_fuel, window_min, interval) -> None:
                 f"Watching CityFlitzers within {radius_m} m of ({lat}, {lng}); "
                 f"polling every {interval}s. Ctrl-C to stop."
             )
-        send_all(notifiers, "teilauto watch",
-                 f"🚗 Watcher started (radius {radius_m} m, every {interval}s)")
+        for error in send_all(
+            notifiers,
+            "teilauto watch",
+            f"🚗 Watcher started (radius {radius_m} m, every {interval}s)",
+        ):
+            err_console.print(f"[red]notify failed:[/red] {error}")
 
         for tick in watch(fetch, interval=interval, sleeper=time.sleep):
             stamp = datetime.now().astimezone().strftime("%H:%M:%S")
