@@ -1,6 +1,6 @@
 [
   {"id": "b-1", "bookeeId": "111", "state": "CONFIRMED",
-   "timeRange": {"start": "2026-07-12T14:00:00.000Z", "end": "2026-07-12T18:00:00.000Z"}},
+   "timeRange": {"start": "2099-01-01T10:00:00.000Z", "end": "2099-01-01T11:00:00.000Z"}},
   {"id": "b-0", "bookeeId": "222", "state": "FINISHED",
    "timeRange": {"start": "2026-07-01T10:00:00.000Z", "end": "2026-07-01T11:00:00.000Z"}}
 ]

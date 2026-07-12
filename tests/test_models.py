@@ -59,7 +59,7 @@ def test_price_unknown_shape_gives_none():
 def test_booking_from_api(bookings_json):
     b = Booking.from_api(bookings_json[0])
     assert (b.id, b.bookee_id, b.state) == ("b-1", "111", "CONFIRMED")
-    assert b.start == "2026-07-12T14:00:00.000Z"
+    assert b.start == "2099-01-01T10:00:00.000Z"
 
 
 def test_unavailability_from_api(unavailabilities_json):
