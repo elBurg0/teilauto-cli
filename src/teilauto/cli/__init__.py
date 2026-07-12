@@ -57,8 +57,12 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
 
 
 from teilauto.cli.auth import auth  # noqa: E402
+from teilauto.cli.cars import cars  # noqa: E402
+from teilauto.cli.price import price  # noqa: E402
 
 cli.add_command(auth)
+cli.add_command(cars)
+cli.add_command(price)
 
 
 def main() -> None:
