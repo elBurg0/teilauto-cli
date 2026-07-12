@@ -32,7 +32,7 @@ def test_to_jsonable_recurses():
         "name": "x",
         "inner": {"when": "2026-07-12T00:00:00+00:00"},
         "tags": ["a", "b"],
-        "where": "/tmp/x",
+        "where": str(Path("/tmp/x")),  # separator differs on Windows
     }
 
 
