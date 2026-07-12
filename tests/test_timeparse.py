@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -42,6 +43,24 @@ def test_iso_with_tz_preserved():
 def test_bad_time_raises():
     with pytest.raises(ValueError, match="Cannot parse time"):
         parse_time("banana", now=NOW)
+
+
+def test_z_suffix_parses_as_utc():
+    dt = parse_time("2026-08-01T10:00:00Z", now=NOW)
+    assert dt.utcoffset() == timedelta(0)
+
+
+def test_naive_iso_in_other_dst_season_gets_correct_offset():
+    berlin_summer = datetime(2026, 7, 12, 15, 0, tzinfo=ZoneInfo("Europe/Berlin"))
+    dt = parse_time("2026-12-15 10:00", now=berlin_summer)
+    assert dt.utcoffset() == timedelta(hours=1)  # CET in December, not CEST
+
+
+def test_tomorrow_across_dst_end_gets_correct_offset():
+    # DST ends 2026-10-25 in Europe/Berlin
+    now = datetime(2026, 10, 24, 15, 0, tzinfo=ZoneInfo("Europe/Berlin"))
+    dt = parse_time("tomorrow 15:00", now=now)
+    assert dt.utcoffset() == timedelta(hours=1)
 
 
 @pytest.mark.parametrize(

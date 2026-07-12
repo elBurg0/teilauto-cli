@@ -46,7 +46,7 @@ Issues = "https://github.com/maxboettinger/teilauto-cli/issues"
 Changelog = "https://github.com/maxboettinger/teilauto-cli/blob/main/CHANGELOG.md"
 
 [dependency-groups]
-dev = ["pytest>=8", "respx>=0.22", "ruff>=0.6"]
+dev = ["pytest>=8", "respx>=0.22", "ruff>=0.6", "tzdata>=2024.1"]
 
 [tool.ruff]
 line-length = 100
