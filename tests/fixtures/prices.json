@@ -1,0 +1,7 @@
+[
+  {"bookeeId": "111",
+   "priceItems": [
+     {"type": "time", "gross": {"amount": 390, "currency": "EUR"}},
+     {"type": "startFee", "gross": {"amount": 100, "currency": "EUR"}}
+   ]}
+]

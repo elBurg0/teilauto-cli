@@ -1,0 +1,27 @@
+[
+  {
+    "id": "poi-1",
+    "places": [
+      {
+        "id": "place-1",
+        "name": "Dresdner Str. 6",
+        "geoCoordinate": {"latitude": 51.339, "longitude": 12.392},
+        "bookees": [
+          {"id": "111", "displayName": "VW Polo", "licenseNumber": "L-TA 1111",
+           "fuelLevel": 80, "bookeeType": {"name": "cityFlitzer"}},
+          {"id": "222", "displayName": "VW Golf", "licenseNumber": "L-TA 2222",
+           "fuelLevel": 20, "bookeeType": {"name": "cityFlitzer"}}
+        ]
+      },
+      {
+        "id": "place-2",
+        "name": "Station Ost",
+        "geoCoordinate": {"latitude": 51.34, "longitude": 12.395},
+        "bookees": [
+          {"id": "333", "displayName": "Kombi", "licenseNumber": "L-TA 3333",
+           "fuelLevel": 90, "bookeeType": {"name": "classic"}}
+        ]
+      }
+    ]
+  }
+]
