@@ -71,3 +71,15 @@ def test_token_info(token_json):
     t = TokenInfo.from_api(token_json)
     assert (t.id, t.customer_id) == ("tok-abc123", "cust-9")
     assert t.expiry == "2026-10-10T00:00:00.000Z"
+
+
+def test_cars_from_poi_dedupes_by_id(poi_json):
+    doubled = poi_json + poi_json  # same cars appear in two POI points
+    cars = cars_from_poi(doubled)
+    assert [c.id for c in cars] == ["111", "222", "333"]
+
+
+def test_price_falls_back_to_top_level_gross():
+    price = Price.from_api({"gross": {"amount": 250, "currency": "EUR"}})
+    assert price.total == 2.50
+    assert price.currency == "EUR"
