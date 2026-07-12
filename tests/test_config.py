@@ -13,7 +13,7 @@ def config_home(tmp_path, monkeypatch):
 
 def test_defaults_when_no_file(config_home):
     s = cfg.load_settings()
-    assert (s.lat, s.lng, s.radius_m) == (51.33853, 12.39163, 500)
+    assert (s.lat, s.lng, s.radius_m) == (51.3455, 12.3821, 500)
     assert s.interval_sec == 120
     assert s.channels == ()
     assert s.ntfy_server == "https://ntfy.sh"
@@ -67,7 +67,7 @@ def test_coerce_value():
 
 def test_effective_config_is_flat(config_home):
     flat = cfg.effective_config()
-    assert flat["location.lat"] == 51.33853
+    assert flat["location.lat"] == 51.3455
     assert "notify.ntfy.server" in flat
     assert set(flat) == set(cfg.KNOWN_KEYS)
 

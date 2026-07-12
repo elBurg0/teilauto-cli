@@ -16,7 +16,7 @@ except ModuleNotFoundError:  # Python 3.10
     import tomli as tomllib
 
 DEFAULTS: dict = {
-    "location": {"lat": 51.33853, "lng": 12.39163, "radius_m": 500},
+    "location": {"lat": 51.3455, "lng": 12.3821, "radius_m": 500},
     "defaults": {"min_fuel": 0.0, "window_min": 30, "interval_sec": 120},
     "api": {"prov_id": "118"},
     "notify": {

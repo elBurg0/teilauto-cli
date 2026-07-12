@@ -22,7 +22,7 @@ def test_config_list_json_shows_effective(runner, isolated_config):
     result = runner.invoke(cli, ["config", "list", "--json"])
     data = json.loads(result.output)
     assert data["location.radius_m"] == 900
-    assert data["location.lat"] == 51.33853  # default still present
+    assert data["location.lat"] == 51.3455  # default still present
 
 
 def test_config_unknown_key_fails(runner, isolated_config):
@@ -79,7 +79,7 @@ def test_config_unset_recovers_from_broken_value(runner, isolated_config):
     result = runner.invoke(cli, ["config", "unset", "location.lat"])
     assert result.exit_code == 0, result.output
     result = runner.invoke(cli, ["config", "get", "location.lat"])
-    assert result.output.strip() == "51.33853"
+    assert result.output.strip() == "51.3455"
 
 
 def test_broken_config_surfaces_as_config_error_no_traceback(runner, isolated_config):

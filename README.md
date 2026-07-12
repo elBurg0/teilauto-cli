@@ -25,8 +25,8 @@ Requires Python 3.10+.
 
 ```bash
 teilauto auth login                        # once; token lasts ~90 days
-teilauto config set location.lat 51.3385    # your home coordinates
-teilauto config set location.lng 12.3916
+teilauto config set location.lat 51.3455    # your home coordinates (default: Leipzig Hbf — set your own!)
+teilauto config set location.lng 12.3821
 teilauto cars list                          # what's nearby?
 teilauto bookings create 111 --for 1h       # book the VW Polo for an hour
 ```
@@ -34,13 +34,13 @@ teilauto bookings create 111 --for 1h       # book the VW Polo for an hour
 `cars list` shows what's parked around you, closest first:
 
 ```
-                                    Cars
-┏━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
-┃ ID  ┃ Name    ┃ Plate     ┃ Fuel ┃ Distance ┃ Address         ┃ Available ┃
-┡━━━━━╇━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━┩
-│ 111 │ VW Polo │ L-TA 1111 │ 80%  │ 120 m    │ Dresdner Str. 6 │ ✓ now     │
-│ 222 │ VW Golf │ L-TA 2222 │ 20%  │ 120 m    │ Dresdner Str. 6 │ ✗         │
-└─────┴─────────┴───────────┴──────┴──────────┴─────────────────┴───────────┘
+                                        Cars
+┏━━━━━┳━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
+┃ ID  ┃ Name    ┃ Plate     ┃ Fuel ┃ Distance ┃ Address                 ┃ Available ┃
+┡━━━━━╇━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━┩
+│ 111 │ VW Polo │ L-TA 1111 │ 80%  │ 62 m     │ Willy-Brandt-Platz 7    │ ✓ now     │
+│ 222 │ VW Golf │ L-TA 2222 │ 20%  │ 62 m     │ Willy-Brandt-Platz 7    │ ✗         │
+└─────┴─────────┴───────────┴──────┴──────────┴─────────────────────────┴───────────┘
 ```
 
 ## Autobook (the good part)
@@ -134,8 +134,8 @@ then environment overrides:
 
 | Key | Default | Meaning |
 | --- | --- | --- |
-| `location.lat` | `51.33853` | Home latitude used when `--lat` isn't given. |
-| `location.lng` | `12.39163` | Home longitude used when `--lng` isn't given. |
+| `location.lat` | `51.3455` | Home latitude used when `--lat` isn't given (default: Leipzig Hbf — set your own). |
+| `location.lng` | `12.3821` | Home longitude used when `--lng` isn't given (default: Leipzig Hbf — set your own). |
 | `location.radius_m` | `500` | Default search radius in metres. |
 | `defaults.min_fuel` | `0.0` | Default minimum fuel level (%) filter. |
 | `defaults.window_min` | `30` | Default booking/search window length in minutes. |

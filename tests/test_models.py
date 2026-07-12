@@ -38,9 +38,9 @@ def test_cars_from_poi(poi_json):
         plate="L-TA 1111",
         fuel=80,
         car_type="cityFlitzer",
-        lat=51.339,
-        lng=12.392,
-        address="Dresdner Str. 6",
+        lat=51.346,
+        lng=12.3825,
+        address="Willy-Brandt-Platz 7",
     )
 
 

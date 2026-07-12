@@ -9,7 +9,7 @@ from teilauto.services.availability import describe, find_cars
 
 START = datetime(2026, 7, 12, 10, 0, tzinfo=timezone.utc)
 END = datetime(2026, 7, 12, 10, 30, tzinfo=timezone.utc)
-HOME = {"lat": 51.33853, "lng": 12.39163, "radius_m": 500}
+HOME = {"lat": 51.3455, "lng": 12.3821, "radius_m": 500}
 
 
 def _mock_routes(respx_mock, poi_json, proposals_json):
@@ -64,7 +64,7 @@ def test_describe_line(respx_mock, poi_json, proposals_json):
     line = describe(items[0])
     assert "VW Polo" in line
     assert "L-TA 1111" in line
-    assert "Dresdner Str. 6" in line
+    assert "Willy-Brandt-Platz 7" in line
 
 
 def _poi(places):
@@ -91,8 +91,8 @@ def _bookee(car_id, fuel=80):
 def test_sorted_closest_first_and_no_coords_last(respx_mock):
     poi = _poi(
         [
-            _place("p-far", "Far", 51.3420, 12.3960, [_bookee("far")]),
-            _place("p-near", "Near", 51.3386, 12.3917, [_bookee("near")]),
+            _place("p-far", "Far", 51.3480, 12.3870, [_bookee("far")]),
+            _place("p-near", "Near", 51.3456, 12.3822, [_bookee("near")]),
             _place("p-nowhere", "Nowhere", None, None, [_bookee("nowhere")]),
         ]
     )
@@ -114,7 +114,7 @@ def test_radius_drops_distant_car(respx_mock):
 
 
 def test_unknown_fuel_counts_as_zero(respx_mock):
-    poi = _poi([_place("p1", "Somewhere", 51.3386, 12.3917, [_bookee("nofuel", fuel=None)])])
+    poi = _poi([_place("p1", "Somewhere", 51.3456, 12.3822, [_bookee("nofuel", fuel=None)])])
     respx_mock.get(f"{BASE_URL}/pointsofinterest").mock(return_value=httpx.Response(200, json=poi))
     respx_mock.get(f"{BASE_URL}/bookingproposals").mock(return_value=httpx.Response(200, json=[]))
     with CantamenClient() as client:

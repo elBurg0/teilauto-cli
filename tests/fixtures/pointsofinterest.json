@@ -4,8 +4,8 @@
     "places": [
       {
         "id": "place-1",
-        "name": "Dresdner Str. 6",
-        "geoCoordinate": {"latitude": 51.339, "longitude": 12.392},
+        "name": "Willy-Brandt-Platz 7",
+        "geoCoordinate": {"latitude": 51.346, "longitude": 12.3825},
         "bookees": [
           {"id": "111", "displayName": "VW Polo", "licenseNumber": "L-TA 1111",
            "fuelLevel": 80, "bookeeType": {"name": "cityFlitzer"}},
@@ -16,7 +16,7 @@
       {
         "id": "place-2",
         "name": "Station Ost",
-        "geoCoordinate": {"latitude": 51.34, "longitude": 12.395},
+        "geoCoordinate": {"latitude": 51.347, "longitude": 12.386},
         "bookees": [
           {"id": "333", "displayName": "Kombi", "licenseNumber": "L-TA 3333",
            "fuelLevel": 90, "bookeeType": {"name": "classic"}}
