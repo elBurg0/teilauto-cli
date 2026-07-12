@@ -77,3 +77,13 @@ def test_env_token_wins(config_home, monkeypatch):
     tokenstore.save_token(StoredToken(id="stored", expiry=None, customer_id=None))
     monkeypatch.setenv("TEILAUTO_TOKEN", "from-env")
     assert tokenstore.load_token() == StoredToken(id="from-env", expiry=None, customer_id=None)
+
+
+def test_load_warns_once_when_fallback_file_exists(config_home, monkeypatch, capsys):
+    monkeypatch.setattr(tokenstore, "keyring", _BrokenKeyring())
+    tokenstore.save_secret("x", "s3cret")
+    tokenstore._warned_fallback = False  # reset the one-time flag set by save
+    assert tokenstore.load_secret("x") == "s3cret"
+    tokenstore.load_secret("x")
+    err = capsys.readouterr().err
+    assert err.count("no usable OS keyring") == 1

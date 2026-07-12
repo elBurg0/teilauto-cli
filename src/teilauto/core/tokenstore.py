@@ -49,8 +49,16 @@ def _file_read() -> dict:
 def _file_write(data: dict) -> None:
     path = _secrets_file()
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data), encoding="utf-8")
-    path.chmod(0o600)
+    tmp = path.with_suffix(".json.tmp")
+    fd = os.open(tmp, os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o600)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as fh:
+            fh.write(json.dumps(data))
+    except Exception:
+        tmp.unlink(missing_ok=True)
+        raise
+    os.replace(tmp, path)
+    path.chmod(0o600)  # os.replace preserves the tmp file's 0o600; keep as belt-and-braces
 
 
 def save_secret(name: str, value: str) -> None:
@@ -68,6 +76,8 @@ def load_secret(name: str) -> str | None:
         value = keyring.get_password(SERVICE, name)
     except Exception:
         value = None
+        if _secrets_file().is_file():
+            _warn_fallback()
     if value is not None:
         return value
     return _file_read().get(name)
@@ -77,7 +87,8 @@ def delete_secret(name: str) -> None:
     try:
         keyring.delete_password(SERVICE, name)
     except Exception:
-        pass
+        if _secrets_file().is_file():
+            _warn_fallback()
     data = _file_read()
     if name in data:
         del data[name]
