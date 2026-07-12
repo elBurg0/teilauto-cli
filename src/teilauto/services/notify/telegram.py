@@ -12,9 +12,13 @@ class TelegramNotifier:
 
     def send(self, title: str, message: str) -> None:
         text = f"{title}\n{message}" if title else message
-        resp = httpx.post(
-            f"https://api.telegram.org/bot{self._bot_token}/sendMessage",
-            data={"chat_id": self._chat_id, "text": text},
-            timeout=20.0,
-        )
-        resp.raise_for_status()
+        try:
+            resp = httpx.post(
+                f"https://api.telegram.org/bot{self._bot_token}/sendMessage",
+                data={"chat_id": self._chat_id, "text": text},
+                timeout=20.0,
+            )
+        except httpx.HTTPError as exc:  # transport errors; never expose exc text (may embed URL)
+            raise RuntimeError(f"Telegram request failed ({type(exc).__name__})") from exc
+        if resp.status_code >= 400:
+            raise RuntimeError(f"Telegram API returned HTTP {resp.status_code}")

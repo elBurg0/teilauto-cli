@@ -67,3 +67,13 @@ def test_send_all_isolates_failures(respx_mock):
     errors = send_all([NtfyNotifier("https://ntfy.sh", "t")], "x", "y")
     assert len(errors) == 1
     assert "ntfy" in errors[0]
+
+
+def test_send_all_never_leaks_telegram_token(respx_mock):
+    respx_mock.post("https://api.telegram.org/botSECRET123/sendMessage").mock(
+        return_value=httpx.Response(400, json={"ok": False})
+    )
+    errors = send_all([TelegramNotifier("SECRET123", "42")], "t", "m")
+    assert len(errors) == 1
+    assert "SECRET123" not in errors[0]
+    assert "400" in errors[0]
