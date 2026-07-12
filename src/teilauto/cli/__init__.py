@@ -58,10 +58,15 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
 
 def main() -> None:
     try:
-        cli(standalone_mode=False)
-    except click.exceptions.Exit as exc:
+        rv = cli(standalone_mode=False)
+    except click.exceptions.Exit as exc:  # raised only in edge paths; keep for safety
         sys.exit(exc.exit_code)
-    except click.exceptions.Abort:
+    except click.exceptions.Abort as exc:
+        if isinstance(exc.__cause__, KeyboardInterrupt) or isinstance(
+            exc.__context__, KeyboardInterrupt
+        ):
+            err_console.print("\nStopped.")
+            sys.exit(130)
         err_console.print("Aborted.")
         sys.exit(1)
     except click.ClickException as exc:
@@ -75,3 +80,5 @@ def main() -> None:
     except KeyboardInterrupt:
         err_console.print("\nStopped.")
         sys.exit(130)
+    if isinstance(rv, int):
+        sys.exit(rv)

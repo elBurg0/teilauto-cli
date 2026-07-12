@@ -24,7 +24,7 @@ def local_time(iso: str | None) -> str:
     try:
         dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
     except ValueError:
-        return iso
+        return "—"
     return dt.astimezone().strftime("%Y-%m-%d %H:%M")
 
 

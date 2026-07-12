@@ -59,3 +59,43 @@ def test_fuel_text_colors():
 def test_local_time_handles_z_and_none():
     assert local_time(None) == "—"
     assert local_time("2026-07-12T10:00:00.000Z") != "—"
+
+
+def _register_hidden(name, fn):
+    cmd = click.command(name=name, hidden=True)(fn)
+    cli.add_command(cmd)
+    return cmd
+
+
+def test_main_propagates_nonzero_ctx_exit(monkeypatch, isolated_config):
+    @click.pass_context
+    def _exit7(ctx):
+        ctx.exit(7)
+
+    _register_hidden("_exit7", _exit7)
+    try:
+        monkeypatch.setattr("sys.argv", ["teilauto", "_exit7"])
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+        assert exc_info.value.code == 7
+    finally:
+        cli.commands.pop("_exit7", None)
+
+
+def test_main_ctrl_c_exits_130(monkeypatch, capsys, isolated_config):
+    def _boom():
+        raise KeyboardInterrupt
+
+    _register_hidden("_boom", _boom)
+    try:
+        monkeypatch.setattr("sys.argv", ["teilauto", "_boom"])
+        with pytest.raises(SystemExit) as exc_info:
+            main()
+        assert exc_info.value.code == 130
+        assert "Stopped" in capsys.readouterr().err
+    finally:
+        cli.commands.pop("_boom", None)
+
+
+def test_local_time_unparseable_returns_dash():
+    assert local_time("not-a-date") == "—"
