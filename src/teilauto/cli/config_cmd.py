@@ -44,8 +44,12 @@ def list_config(as_json: bool) -> None:
 @config_group.command("get")
 @click.argument("key")
 def get_config(key: str) -> None:
-    """Print one effective config value."""
+    """Print one effective config value (secrets show only whether they are set)."""
     _check_key(key)
+    if key in SECRET_KEYS:
+        value = tokenstore.load_secret(SECRET_KEYS[key])
+        click.echo("(set)" if value else "(not set)")
+        return
     click.echo(cfg.effective_config()[key])
 
 

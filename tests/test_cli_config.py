@@ -62,3 +62,15 @@ def test_notify_test_sends(runner, isolated_config, respx_mock, monkeypatch):
     assert result.exit_code == 0, result.output
     assert route.called
     assert "ntfy" in result.output
+
+
+def test_config_get_secret_key_shows_presence_not_value(runner, isolated_config):
+    result = runner.invoke(cli, ["config", "get", "notify.telegram.bot_token"])
+    assert result.exit_code == 0
+    assert result.output.strip() == "(not set)"
+
+    runner.invoke(cli, ["config", "set", "notify.telegram.bot_token", "TOK123"])
+    result = runner.invoke(cli, ["config", "get", "notify.telegram.bot_token"])
+    assert result.exit_code == 0
+    assert result.output.strip() == "(set)"
+    assert "TOK123" not in result.output
