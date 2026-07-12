@@ -56,6 +56,11 @@ def cli(ctx: click.Context, verbose: bool, quiet: bool) -> None:
     ctx.obj = AppContext(settings=load_settings(), verbose=verbose, quiet=quiet)
 
 
+from teilauto.cli.auth import auth  # noqa: E402
+
+cli.add_command(auth)
+
+
 def main() -> None:
     try:
         rv = cli(standalone_mode=False)
