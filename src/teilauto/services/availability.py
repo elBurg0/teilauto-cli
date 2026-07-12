@@ -31,7 +31,8 @@ def find_cars(
     """Merge car metadata (POI) with the bookability oracle (proposals).
 
     The API's own distance field is unreliable; distances are recomputed via
-    haversine and cars outside radius_m are dropped.
+    haversine and cars outside radius_m are dropped. Cars without coordinates
+    are kept (distance unknown, sorted last); cars with unknown fuel are treated as 0%.
     """
     cars = client.points_of_interest(lat=lat, lng=lng, radius_m=radius_m, start=start, end=end)
     free_from_by_id = {
