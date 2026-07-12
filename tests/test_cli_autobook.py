@@ -30,8 +30,9 @@ def test_autobook_requires_login(runner, isolated_config):
     assert result.exception is not None
 
 
-def test_autobook_books_first_match(runner, logged_in, respx_mock,
-                                    poi_json, proposals_json, prices_json, bookings_json):
+def test_autobook_books_first_match(
+    runner, logged_in, respx_mock, poi_json, proposals_json, prices_json, bookings_json
+):
     _mock_search(respx_mock, poi_json, proposals_json)
     respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(200, json=prices_json))
     post = respx_mock.post(f"{BASE_URL}/bookings").mock(
@@ -46,8 +47,9 @@ def test_autobook_books_first_match(runner, logged_in, respx_mock,
     assert data["car"]["id"] == "111"
 
 
-def test_autobook_dry_run_does_not_post(runner, logged_in, respx_mock,
-                                        poi_json, proposals_json, prices_json):
+def test_autobook_dry_run_does_not_post(
+    runner, logged_in, respx_mock, poi_json, proposals_json, prices_json
+):
     _mock_search(respx_mock, poi_json, proposals_json)
     respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(200, json=prices_json))
     post = respx_mock.post(f"{BASE_URL}/bookings")
@@ -57,8 +59,9 @@ def test_autobook_dry_run_does_not_post(runner, logged_in, respx_mock,
     assert json.loads(result.output)["status"] == "dry_run"
 
 
-def test_autobook_respects_max_price(runner, logged_in, respx_mock, monkeypatch,
-                                     poi_json, proposals_json, prices_json):
+def test_autobook_respects_max_price(
+    runner, logged_in, respx_mock, monkeypatch, poi_json, proposals_json, prices_json
+):
     # stop after the first cycle: candidate too expensive, then deadline passes
     monkeypatch.setattr("teilauto.cli.autobook.time.sleep", lambda s: None)
     _mock_search(respx_mock, poi_json, proposals_json)
@@ -75,9 +78,9 @@ def test_autobook_respects_max_price(runner, logged_in, respx_mock, monkeypatch,
     assert price_calls  # the candidate loop actually executed
 
 
-def test_autobook_keeps_polling_when_booking_races(runner, logged_in, respx_mock, monkeypatch,
-                                                   poi_json, proposals_json, prices_json,
-                                                   bookings_json):
+def test_autobook_keeps_polling_when_booking_races(
+    runner, logged_in, respx_mock, monkeypatch, poi_json, proposals_json, prices_json, bookings_json
+):
     monkeypatch.setattr("teilauto.cli.autobook.time.sleep", lambda s: None)
     _mock_search(respx_mock, poi_json, proposals_json)
     respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(200, json=prices_json))
@@ -92,8 +95,9 @@ def test_autobook_keeps_polling_when_booking_races(runner, logged_in, respx_mock
     assert "Booked" in result.output
 
 
-def test_autobook_until_in_past_exits_2(runner, logged_in, monkeypatch,
-                                        respx_mock, poi_json, proposals_json):
+def test_autobook_until_in_past_exits_2(
+    runner, logged_in, monkeypatch, respx_mock, poi_json, proposals_json
+):
     monkeypatch.setattr("teilauto.cli.autobook.time.sleep", lambda s: None)
     _mock_search(respx_mock, poi_json, proposals_json)
     result = runner.invoke(cli, ["autobook", "--until", "2020-01-01T10:00:00", "--yes"])
@@ -102,8 +106,9 @@ def test_autobook_until_in_past_exits_2(runner, logged_in, monkeypatch,
     assert not post
 
 
-def test_autobook_max_price_fails_closed_on_price_error(runner, logged_in, monkeypatch,
-                                                        respx_mock, poi_json, proposals_json):
+def test_autobook_max_price_fails_closed_on_price_error(
+    runner, logged_in, monkeypatch, respx_mock, poi_json, proposals_json
+):
     monkeypatch.setattr("teilauto.cli.autobook.time.sleep", lambda s: None)
     _mock_search(respx_mock, poi_json, proposals_json)
     respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(500))
@@ -118,9 +123,9 @@ def test_autobook_max_price_fails_closed_on_price_error(runner, logged_in, monke
     assert price_calls  # the candidate loop actually executed
 
 
-def test_autobook_gives_up_on_permanently_failing_car(runner, logged_in, monkeypatch,
-                                                      respx_mock, poi_json, proposals_json,
-                                                      prices_json):
+def test_autobook_gives_up_on_permanently_failing_car(
+    runner, logged_in, monkeypatch, respx_mock, poi_json, proposals_json, prices_json
+):
     monkeypatch.setattr("teilauto.cli.autobook.time.sleep", lambda s: None)
     _mock_search(respx_mock, poi_json, proposals_json)
     respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(200, json=prices_json))
@@ -128,9 +133,7 @@ def test_autobook_gives_up_on_permanently_failing_car(runner, logged_in, monkeyp
         return_value=httpx.Response(400, json={"message": "nope"})
     )
     deadline = (datetime.now().astimezone() + timedelta(seconds=2)).isoformat()
-    result = runner.invoke(
-        cli, ["autobook", "--for", "1h", "--yes", "--deadline", deadline]
-    )
+    result = runner.invoke(cli, ["autobook", "--for", "1h", "--yes", "--deadline", deadline])
     # a permanently failing car is attempted at most 3 times, then dropped
     assert post.call_count == 3
     assert result.exception is not None

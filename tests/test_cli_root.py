@@ -9,8 +9,17 @@ from teilauto.core.config import Settings
 from teilauto.output.render import fuel_text, local_time
 
 SETTINGS = Settings(
-    lat=51.0, lng=12.0, radius_m=500, min_fuel=0.0, window_min=30, interval_sec=120,
-    prov_id="118", channels=(), tg_chat_id="", ntfy_topic="", ntfy_server="https://ntfy.sh",
+    lat=51.0,
+    lng=12.0,
+    radius_m=500,
+    min_fuel=0.0,
+    window_min=30,
+    interval_sec=120,
+    prov_id="118",
+    channels=(),
+    tg_chat_id="",
+    ntfy_topic="",
+    ntfy_server="https://ntfy.sh",
 )
 
 

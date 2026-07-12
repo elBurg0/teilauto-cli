@@ -2,18 +2,26 @@ from __future__ import annotations
 
 from itertools import islice
 
-import pytest
-
 from teilauto.api.models import Car
 from teilauto.services.availability import CarAvailability
-from teilauto.services.watcher import WatchTick, watch
+from teilauto.services.watcher import watch
 
 
 def _car(car_id: str, available: bool = True) -> CarAvailability:
     return CarAvailability(
-        car=Car(id=car_id, name=f"Car {car_id}", plate=None, fuel=50,
-                car_type="cityFlitzer", lat=None, lng=None, address=None),
-        distance_m=100, available=available, free_from=None,
+        car=Car(
+            id=car_id,
+            name=f"Car {car_id}",
+            plate=None,
+            fuel=50,
+            car_type="cityFlitzer",
+            lat=None,
+            lng=None,
+            address=None,
+        ),
+        distance_m=100,
+        available=available,
+        free_from=None,
     )
 
 

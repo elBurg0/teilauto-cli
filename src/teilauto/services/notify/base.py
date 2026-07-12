@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import os
-from typing import Protocol, Sequence
+from collections.abc import Sequence
+from typing import Protocol
 
 from teilauto.api.errors import ConfigError
 from teilauto.core.config import Settings

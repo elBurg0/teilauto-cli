@@ -62,7 +62,8 @@ def read_raw(path: Path | None = None) -> dict:
     except tomllib.TOMLDecodeError as exc:
         raise ConfigError(
             f"Config file {path} is not valid TOML: {exc}",
-            hint="Fix the file or delete it to start fresh (`teilauto config path` shows its location).",
+            hint="Fix the file or delete it to start fresh "
+            "(`teilauto config path` shows its location).",
         ) from exc
 
 

@@ -27,7 +27,8 @@ def test_today_prefix_stays_today_even_if_past():
 
 
 def test_tomorrow():
-    assert parse_time("tomorrow 08:15", now=NOW) == NOW.replace(hour=8, minute=15) + timedelta(days=1)
+    expected = NOW.replace(hour=8, minute=15) + timedelta(days=1)
+    assert parse_time("tomorrow 08:15", now=NOW) == expected
 
 
 def test_iso_naive_gets_local_tz():
@@ -65,9 +66,13 @@ def test_tomorrow_across_dst_end_gets_correct_offset():
 
 @pytest.mark.parametrize(
     ("text", "expected"),
-    [("30m", timedelta(minutes=30)), ("2h", timedelta(hours=2)),
-     ("1h30m", timedelta(hours=1, minutes=30)), ("90", timedelta(minutes=90)),
-     ("45min", timedelta(minutes=45))],
+    [
+        ("30m", timedelta(minutes=30)),
+        ("2h", timedelta(hours=2)),
+        ("1h30m", timedelta(hours=1, minutes=30)),
+        ("90", timedelta(minutes=90)),
+        ("45min", timedelta(minutes=45)),
+    ],
 )
 def test_durations(text, expected):
     assert parse_duration(text) == expected

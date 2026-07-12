@@ -17,19 +17,19 @@ def auth() -> None:
 
 @auth.command()
 @click.option("--email", prompt="Email", help="Your teilauto account email.")
-@click.option("--password", prompt="Password", hide_input=True,
-              help="Account password (never stored — only the session token is kept).")
+@click.option(
+    "--password",
+    prompt="Password",
+    hide_input=True,
+    help="Account password (never stored — only the session token is kept).",
+)
 @click.pass_obj
 def login(app, email: str, password: str) -> None:
     """Authenticate once; the returned token is valid for about 90 days."""
     with CantamenClient(verbose=app.verbose) as client:
         info = client.login(email, password, prov_id=app.settings.prov_id)
-    tokenstore.save_token(
-        StoredToken(id=info.id, expiry=info.expiry, customer_id=info.customer_id)
-    )
-    console.print(
-        f"[green]✓ Logged in.[/green] Token valid until {local_time(info.expiry)}."
-    )
+    tokenstore.save_token(StoredToken(id=info.id, expiry=info.expiry, customer_id=info.customer_id))
+    console.print(f"[green]✓ Logged in.[/green] Token valid until {local_time(info.expiry)}.")
 
 
 @auth.command()

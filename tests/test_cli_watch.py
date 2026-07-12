@@ -33,8 +33,9 @@ def _mock_search(respx_mock, poi_json, proposals_json):
     )
 
 
-def test_watch_prints_status_and_new_car(runner, isolated_config, respx_mock,
-                                         poi_json, proposals_json, one_cycle):
+def test_watch_prints_status_and_new_car(
+    runner, isolated_config, respx_mock, poi_json, proposals_json, one_cycle
+):
     _mock_search(respx_mock, poi_json, proposals_json)
     result = runner.invoke(cli, ["watch"])
     assert isinstance(result.exception, StopLoop)
@@ -44,8 +45,9 @@ def test_watch_prints_status_and_new_car(runner, isolated_config, respx_mock,
     assert "no notification channels" in result.stderr.lower()
 
 
-def test_watch_notifies_via_ntfy(runner, isolated_config, respx_mock, monkeypatch,
-                                 poi_json, proposals_json, one_cycle):
+def test_watch_notifies_via_ntfy(
+    runner, isolated_config, respx_mock, monkeypatch, poi_json, proposals_json, one_cycle
+):
     monkeypatch.setenv("TEILAUTO_NOTIFY_CHANNELS", "ntfy")
     monkeypatch.setenv("TEILAUTO_NOTIFY_NTFY_TOPIC", "t")
     _mock_search(respx_mock, poi_json, proposals_json)
@@ -56,9 +58,9 @@ def test_watch_notifies_via_ntfy(runner, isolated_config, respx_mock, monkeypatc
     assert ntfy_route.call_count == 2
 
 
-def test_watch_reports_failing_startup_notification(runner, isolated_config, respx_mock,
-                                                    monkeypatch, poi_json, proposals_json,
-                                                    one_cycle):
+def test_watch_reports_failing_startup_notification(
+    runner, isolated_config, respx_mock, monkeypatch, poi_json, proposals_json, one_cycle
+):
     monkeypatch.setenv("TEILAUTO_NOTIFY_CHANNELS", "ntfy")
     monkeypatch.setenv("TEILAUTO_NOTIFY_NTFY_TOPIC", "t")
     _mock_search(respx_mock, poi_json, proposals_json)

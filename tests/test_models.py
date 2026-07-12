@@ -33,8 +33,14 @@ def test_cars_from_poi(poi_json):
     assert [c.id for c in cars] == ["111", "222", "333"]
     polo = cars[0]
     assert polo == Car(
-        id="111", name="VW Polo", plate="L-TA 1111", fuel=80,
-        car_type="cityFlitzer", lat=51.339, lng=12.392, address="Dresdner Str. 6",
+        id="111",
+        name="VW Polo",
+        plate="L-TA 1111",
+        fuel=80,
+        car_type="cityFlitzer",
+        lat=51.339,
+        lng=12.392,
+        address="Dresdner Str. 6",
     )
 
 

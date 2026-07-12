@@ -41,8 +41,9 @@ def test_bookings_show(runner, logged_in, respx_mock, bookings_json):
     assert "b-1" in result.output
 
 
-def test_create_prompts_and_books(runner, logged_in, respx_mock,
-                                  poi_json, prices_json, bookings_json):
+def test_create_prompts_and_books(
+    runner, logged_in, respx_mock, poi_json, prices_json, bookings_json
+):
     bookee = poi_json[0]["places"][0]["bookees"][0] | {"place": poi_json[0]["places"][0]}
     respx_mock.get(f"{BASE_URL}/bookees/111").mock(return_value=httpx.Response(200, json=bookee))
     respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(200, json=prices_json))
@@ -66,9 +67,7 @@ def test_create_aborts_on_no(runner, logged_in, respx_mock, poi_json, prices_jso
 
 
 def test_cancel_with_yes(runner, logged_in, respx_mock):
-    route = respx_mock.delete(f"{BASE_URL}/bookings/b-1").mock(
-        return_value=httpx.Response(204)
-    )
+    route = respx_mock.delete(f"{BASE_URL}/bookings/b-1").mock(return_value=httpx.Response(204))
     result = runner.invoke(cli, ["bookings", "cancel", "b-1", "--yes"])
     assert result.exit_code == 0, result.output
     assert route.called

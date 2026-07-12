@@ -35,8 +35,10 @@ def price(app, car_id, start_text, duration_text, until_text, as_json) -> None:
     console.print(
         kv_panel(
             f"Price for car {car_id}",
-            {"from": start.strftime("%Y-%m-%d %H:%M"),
-             "until": end.strftime("%Y-%m-%d %H:%M"),
-             "total": total},
+            {
+                "from": start.strftime("%Y-%m-%d %H:%M"),
+                "until": end.strftime("%Y-%m-%d %H:%M"),
+                "total": total,
+            },
         )
     )

@@ -18,25 +18,69 @@ from teilauto.services.watcher import watch
 
 @click.command("autobook")
 @location_options
-@click.option("--for", "duration_text", default=None, metavar="DURATION",
-              help="Booking duration once a car is found, e.g. '45m', '2h'.")
-@click.option("--until", "until_text", default=None, metavar="TIME",
-              help="Fixed booking end time instead of --for.")
-@click.option("--min-fuel", type=float, default=None, metavar="PERCENT",
-              help="Ignore cars below this fuel level (default: config).")
-@click.option("--max-price", type=float, default=None, metavar="EUR",
-              help="Skip cars whose booking would cost more than this.")
-@click.option("--deadline", "deadline_text", default=None, metavar="TIME",
-              help="Give up (exit 2) if no car was booked by this time.")
-@click.option("--interval", type=int, default=None, metavar="SECONDS",
-              help="Seconds between polls (default: config).")
-@click.option("--dry-run", is_flag=True,
-              help="Do everything except the actual booking (no login needed).")
+@click.option(
+    "--for",
+    "duration_text",
+    default=None,
+    metavar="DURATION",
+    help="Booking duration once a car is found, e.g. '45m', '2h'.",
+)
+@click.option(
+    "--until",
+    "until_text",
+    default=None,
+    metavar="TIME",
+    help="Fixed booking end time instead of --for.",
+)
+@click.option(
+    "--min-fuel",
+    type=float,
+    default=None,
+    metavar="PERCENT",
+    help="Ignore cars below this fuel level (default: config).",
+)
+@click.option(
+    "--max-price",
+    type=float,
+    default=None,
+    metavar="EUR",
+    help="Skip cars whose booking would cost more than this.",
+)
+@click.option(
+    "--deadline",
+    "deadline_text",
+    default=None,
+    metavar="TIME",
+    help="Give up (exit 2) if no car was booked by this time.",
+)
+@click.option(
+    "--interval",
+    type=int,
+    default=None,
+    metavar="SECONDS",
+    help="Seconds between polls (default: config).",
+)
+@click.option(
+    "--dry-run", is_flag=True, help="Do everything except the actual booking (no login needed)."
+)
 @click.option("--yes", "-y", is_flag=True, help="Skip the confirmation prompt.")
 @json_option
 @click.pass_obj
-def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
-                 max_price, deadline_text, interval, dry_run, yes, as_json) -> None:
+def autobook_cmd(
+    app,
+    lat,
+    lng,
+    radius_m,
+    duration_text,
+    until_text,
+    min_fuel,
+    max_price,
+    deadline_text,
+    interval,
+    dry_run,
+    yes,
+    as_json,
+) -> None:
     """Book the closest matching CityFlitzer the moment one becomes available.
 
     This spends real money on your real account. Safety rails: a criteria
@@ -93,20 +137,34 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
 
     def finish(status: str, ca: CarAvailability | None, booking, price) -> None:
         if as_json:
-            print_json({"status": status, "car": ca.car if ca else None,
-                        "booking": booking, "price": price})
+            print_json(
+                {
+                    "status": status,
+                    "car": ca.car if ca else None,
+                    "booking": booking,
+                    "price": price,
+                }
+            )
 
     with app.client() as client:
 
         def fetch():
             start, end = booking_window()
             return find_cars(
-                client, lat=lat, lng=lng, radius_m=radius_m,
-                start=start, end=end, min_fuel=min_fuel,
+                client,
+                lat=lat,
+                lng=lng,
+                radius_m=radius_m,
+                start=start,
+                end=end,
+                min_fuel=min_fuel,
             )
 
-        send_all(notifiers, "teilauto autobook",
-                 f"🤖 Autobook started (radius {radius_m} m, every {interval}s)")
+        send_all(
+            notifiers,
+            "teilauto autobook",
+            f"🤖 Autobook started (radius {radius_m} m, every {interval}s)",
+        )
         if not app.quiet and not as_json:
             console.print(f"Hunting for a car... polling every {interval}s. Ctrl-C to stop.")
 
@@ -136,9 +194,9 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
                         f"[dim]{stamp}[/dim] {tick.nearby} nearby, {tick.available} bookable"
                     )
                 retries = [
-                    ca for ca in tick.retryable
-                    if failed_counts.get(ca.car.id, 0) > 0
-                    and failed_counts.get(ca.car.id, 0) < 3
+                    ca
+                    for ca in tick.retryable
+                    if failed_counts.get(ca.car.id, 0) > 0 and failed_counts.get(ca.car.id, 0) < 3
                 ]
                 for ca in list(tick.new) + retries:
                     start, end = booking_window()
@@ -182,8 +240,7 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
                     except TeilautoError as exc:
                         failed_counts[ca.car.id] = failed_counts.get(ca.car.id, 0) + 1
                         err_console.print(
-                            f"  [yellow]booking failed (car taken?):[/yellow] {exc} — "
-                            f"continuing"
+                            f"  [yellow]booking failed (car taken?):[/yellow] {exc} — continuing"
                         )
                         if failed_counts[ca.car.id] >= 3:
                             err_console.print(
@@ -191,9 +248,7 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
                                 f"after 3 failed booking attempts"
                             )
                         continue
-                    message = (
-                        f"Booked {describe(ca)}{price_line} — booking id {booking.id}"
-                    )
+                    message = f"Booked {describe(ca)}{price_line} — booking id {booking.id}"
                     if not as_json:
                         console.print(f"[green]✓ Booked![/green] {message}")
                     send_all(notifiers, "Car booked", f"🚗 {message}")

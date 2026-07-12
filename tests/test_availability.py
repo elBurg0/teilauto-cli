@@ -79,16 +79,23 @@ def _place(place_id, name, lat, lng, bookees):
 
 
 def _bookee(car_id, fuel=80):
-    return {"id": car_id, "displayName": f"Car {car_id}", "licenseNumber": f"L-{car_id}",
-            "fuelLevel": fuel, "bookeeType": {"name": "cityFlitzer"}}
+    return {
+        "id": car_id,
+        "displayName": f"Car {car_id}",
+        "licenseNumber": f"L-{car_id}",
+        "fuelLevel": fuel,
+        "bookeeType": {"name": "cityFlitzer"},
+    }
 
 
 def test_sorted_closest_first_and_no_coords_last(respx_mock):
-    poi = _poi([
-        _place("p-far", "Far", 51.3420, 12.3960, [_bookee("far")]),
-        _place("p-near", "Near", 51.3386, 12.3917, [_bookee("near")]),
-        _place("p-nowhere", "Nowhere", None, None, [_bookee("nowhere")]),
-    ])
+    poi = _poi(
+        [
+            _place("p-far", "Far", 51.3420, 12.3960, [_bookee("far")]),
+            _place("p-near", "Near", 51.3386, 12.3917, [_bookee("near")]),
+            _place("p-nowhere", "Nowhere", None, None, [_bookee("nowhere")]),
+        ]
+    )
     respx_mock.get(f"{BASE_URL}/pointsofinterest").mock(return_value=httpx.Response(200, json=poi))
     respx_mock.get(f"{BASE_URL}/bookingproposals").mock(return_value=httpx.Response(200, json=[]))
     with CantamenClient() as client:

@@ -15,8 +15,17 @@ from teilauto.services.notify import (
 
 def _settings(**kw) -> Settings:
     base = dict(
-        lat=51.0, lng=12.0, radius_m=500, min_fuel=0.0, window_min=30, interval_sec=120,
-        prov_id="118", channels=(), tg_chat_id="", ntfy_topic="", ntfy_server="https://ntfy.sh",
+        lat=51.0,
+        lng=12.0,
+        radius_m=500,
+        min_fuel=0.0,
+        window_min=30,
+        interval_sec=120,
+        prov_id="118",
+        channels=(),
+        tg_chat_id="",
+        ntfy_topic="",
+        ntfy_server="https://ntfy.sh",
     )
     base.update(kw)
     return Settings(**base)
@@ -50,10 +59,8 @@ def test_build_notifiers_from_settings(monkeypatch):
 
 def test_build_notifiers_missing_telegram_config(monkeypatch):
     monkeypatch.delenv("TEILAUTO_TG_BOT_TOKEN", raising=False)
-    monkeypatch.setattr(
-        "teilauto.services.notify.base.load_secret", lambda name: None
-    )
-    with pytest.raises(ConfigError, match="[Tt]elegram"):
+    monkeypatch.setattr("teilauto.services.notify.base.load_secret", lambda name: None)
+    with pytest.raises(ConfigError, match=r"[Tt]elegram"):
         build_notifiers(_settings(channels=("telegram",), tg_chat_id="42"))
 
 

@@ -32,8 +32,7 @@ def _warn_fallback() -> None:
     global _warned_fallback
     if not _warned_fallback:
         print(
-            "warning: no usable OS keyring; storing secrets in "
-            f"{_secrets_file()} (chmod 600)",
+            f"warning: no usable OS keyring; storing secrets in {_secrets_file()} (chmod 600)",
             file=sys.stderr,
         )
         _warned_fallback = True

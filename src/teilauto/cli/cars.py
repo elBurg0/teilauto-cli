@@ -23,16 +23,39 @@ def cars() -> None:
 @cars.command("list")
 @location_options
 @window_options
-@click.option("--type", "car_type", type=click.Choice(["cityflitzer", "all"]),
-              default="cityflitzer", show_default=True, help="Car type filter.")
-@click.option("--available", "only_available", is_flag=True,
-              help="Show only cars bookable in the window.")
-@click.option("--min-fuel", type=float, default=None, metavar="PERCENT",
-              help="Hide cars below this fuel level (default: config).")
+@click.option(
+    "--type",
+    "car_type",
+    type=click.Choice(["cityflitzer", "all"]),
+    default="cityflitzer",
+    show_default=True,
+    help="Car type filter.",
+)
+@click.option(
+    "--available", "only_available", is_flag=True, help="Show only cars bookable in the window."
+)
+@click.option(
+    "--min-fuel",
+    type=float,
+    default=None,
+    metavar="PERCENT",
+    help="Hide cars below this fuel level (default: config).",
+)
 @json_option
 @click.pass_obj
-def list_cars(app, lat, lng, radius_m, start_text, duration_text, until_text,
-              car_type, only_available, min_fuel, as_json) -> None:
+def list_cars(
+    app,
+    lat,
+    lng,
+    radius_m,
+    start_text,
+    duration_text,
+    until_text,
+    car_type,
+    only_available,
+    min_fuel,
+    as_json,
+) -> None:
     """List cars near a location, closest first."""
     settings = app.settings
     lat, lng, radius_m = resolve_location(settings, lat, lng, radius_m)
@@ -42,7 +65,11 @@ def list_cars(app, lat, lng, radius_m, start_text, duration_text, until_text,
     with app.client() as client:
         items = find_cars(
             client,
-            lat=lat, lng=lng, radius_m=radius_m, start=start, end=end,
+            lat=lat,
+            lng=lng,
+            radius_m=radius_m,
+            start=start,
+            end=end,
             car_type=None if car_type == "all" else CITYFLITZER_TYPE,
             min_fuel=settings.min_fuel if min_fuel is None else min_fuel,
             only_available=only_available,

@@ -14,12 +14,28 @@ from teilauto.services.watcher import watch
 
 @click.command("watch")
 @location_options
-@click.option("--min-fuel", type=float, default=None, metavar="PERCENT",
-              help="Ignore cars below this fuel level (default: config).")
-@click.option("--window", "window_min", type=int, default=None, metavar="MINUTES",
-              help="Booking window tested for availability (default: config).")
-@click.option("--interval", type=int, default=None, metavar="SECONDS",
-              help="Seconds between polls (default: config).")
+@click.option(
+    "--min-fuel",
+    type=float,
+    default=None,
+    metavar="PERCENT",
+    help="Ignore cars below this fuel level (default: config).",
+)
+@click.option(
+    "--window",
+    "window_min",
+    type=int,
+    default=None,
+    metavar="MINUTES",
+    help="Booking window tested for availability (default: config).",
+)
+@click.option(
+    "--interval",
+    type=int,
+    default=None,
+    metavar="SECONDS",
+    help="Seconds between polls (default: config).",
+)
 @click.pass_obj
 def watch_cmd(app, lat, lng, radius_m, min_fuel, window_min, interval) -> None:
     """Watch for CityFlitzers becoming available and send a notification.
@@ -45,8 +61,13 @@ def watch_cmd(app, lat, lng, radius_m, min_fuel, window_min, interval) -> None:
             start = datetime.now().astimezone()
             end = start + timedelta(minutes=window_min)
             return find_cars(
-                client, lat=lat, lng=lng, radius_m=radius_m,
-                start=start, end=end, min_fuel=min_fuel,
+                client,
+                lat=lat,
+                lng=lng,
+                radius_m=radius_m,
+                start=start,
+                end=end,
+                min_fuel=min_fuel,
             )
 
         if not app.quiet:

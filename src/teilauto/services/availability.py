@@ -37,9 +37,7 @@ def find_cars(
     cars = client.points_of_interest(lat=lat, lng=lng, radius_m=radius_m, start=start, end=end)
     free_from_by_id = {
         p.bookee_id: p.free_from
-        for p in client.booking_proposals(
-            lat=lat, lng=lng, radius_m=radius_m, start=start, end=end
-        )
+        for p in client.booking_proposals(lat=lat, lng=lng, radius_m=radius_m, start=start, end=end)
     }
     items: list[CarAvailability] = []
     for car in cars:

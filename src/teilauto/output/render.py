@@ -46,11 +46,7 @@ def cars_table(items: list[CarAvailability]) -> Table:
     for column in ("ID", "Name", "Plate", "Fuel", "Distance", "Address", "Available"):
         table.add_column(column)
     for ca in items:
-        available = (
-            Text("✓ now", style="green")
-            if ca.available
-            else Text("✗", style="dim")
-        )
+        available = Text("✓ now", style="green") if ca.available else Text("✗", style="dim")
         table.add_row(
             ca.car.id,
             ca.car.name,

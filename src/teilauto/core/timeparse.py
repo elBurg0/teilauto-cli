@@ -15,9 +15,7 @@ def _hhmm_candidate(base: datetime, hh: int, mm: int, day: str | None) -> dateti
     is a naive wall-clock datetime or an aware one.
     """
     candidate = base.replace(hour=hh, minute=mm, second=0, microsecond=0)
-    if day == "tomorrow":
-        candidate += timedelta(days=1)
-    elif day is None and candidate <= base - timedelta(minutes=1):
+    if day == "tomorrow" or (day is None and candidate <= base - timedelta(minutes=1)):
         candidate += timedelta(days=1)
     return candidate
 
@@ -70,10 +68,7 @@ def parse_time(text: str, *, now: datetime | None = None) -> datetime:
             f"Cannot parse time: {text!r}. Try 'now', '14:30', 'tomorrow 09:00' or ISO-8601."
         ) from None
     if dt.tzinfo is None:
-        if explicit_now:
-            dt = dt.replace(tzinfo=now.tzinfo)
-        else:
-            dt = dt.astimezone()
+        dt = dt.replace(tzinfo=now.tzinfo) if explicit_now else dt.astimezone()
     return dt
 
 

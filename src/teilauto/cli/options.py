@@ -13,20 +13,42 @@ def json_option(f):
 
 
 def location_options(f):
-    f = click.option("--radius", "radius_m", type=int, default=None, metavar="METRES",
-                     help="Search radius in metres (default: config).")(f)
+    f = click.option(
+        "--radius",
+        "radius_m",
+        type=int,
+        default=None,
+        metavar="METRES",
+        help="Search radius in metres (default: config).",
+    )(f)
     f = click.option("--lng", type=float, default=None, help="Longitude (default: config).")(f)
     f = click.option("--lat", type=float, default=None, help="Latitude (default: config).")(f)
     return f
 
 
 def window_options(f):
-    f = click.option("--until", "until_text", default=None, metavar="TIME",
-                     help="Window end, e.g. '18:00' or 'tomorrow 09:00'.")(f)
-    f = click.option("--for", "duration_text", default=None, metavar="DURATION",
-                     help="Window length, e.g. '30m', '2h', '1h30m'.")(f)
-    f = click.option("--from", "start_text", default="now", metavar="TIME", show_default=True,
-                     help="Window start, e.g. 'now', '14:30', 'tomorrow 09:00'.")(f)
+    f = click.option(
+        "--until",
+        "until_text",
+        default=None,
+        metavar="TIME",
+        help="Window end, e.g. '18:00' or 'tomorrow 09:00'.",
+    )(f)
+    f = click.option(
+        "--for",
+        "duration_text",
+        default=None,
+        metavar="DURATION",
+        help="Window length, e.g. '30m', '2h', '1h30m'.",
+    )(f)
+    f = click.option(
+        "--from",
+        "start_text",
+        default="now",
+        metavar="TIME",
+        show_default=True,
+        help="Window start, e.g. 'now', '14:30', 'tomorrow 09:00'.",
+    )(f)
     return f
 
 
