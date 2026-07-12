@@ -8,6 +8,8 @@ from pathlib import Path
 import platformdirs
 import tomli_w
 
+from teilauto.api.errors import ConfigError
+
 try:
     import tomllib
 except ModuleNotFoundError:  # Python 3.10
@@ -54,8 +56,14 @@ def read_raw(path: Path | None = None) -> dict:
     path = path or config_file()
     if not path.is_file():
         return {}
-    with path.open("rb") as fh:
-        return tomllib.load(fh)
+    try:
+        with path.open("rb") as fh:
+            return tomllib.load(fh)
+    except tomllib.TOMLDecodeError as exc:
+        raise ConfigError(
+            f"Config file {path} is not valid TOML: {exc}",
+            hint="Fix the file or delete it to start fresh (`teilauto config path` shows its location).",
+        ) from exc
 
 
 def write_raw(data: dict, path: Path | None = None) -> None:
@@ -127,7 +135,9 @@ def _merged(path: Path | None = None) -> dict:
             continue
         default = get_value(DEFAULTS, key)
         value: object
-        if isinstance(default, list):
+        if isinstance(default, bool):
+            value = raw.strip().lower() in ("1", "true", "yes", "on")
+        elif isinstance(default, list):
             value = [part.strip() for part in raw.split(",") if part.strip()]
         elif isinstance(default, float):
             value = float(raw)
@@ -175,5 +185,5 @@ def load_settings(path: Path | None = None) -> Settings:
         channels=tuple(channels or ()),
         tg_chat_id=str(get_value(merged, "notify.telegram.chat_id") or ""),
         ntfy_topic=str(get_value(merged, "notify.ntfy.topic") or ""),
-        ntfy_server=str(get_value(merged, "notify.ntfy.server") or "https://ntfy.sh"),
+        ntfy_server=str(get_value(merged, "notify.ntfy.server")),
     )

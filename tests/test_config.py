@@ -74,3 +74,16 @@ def test_effective_config_is_flat(config_home):
 
 def test_config_file_under_config_dir(config_home):
     assert cfg.config_file().parent == config_home
+
+
+def test_malformed_toml_raises_config_error(config_home):
+    from teilauto.api.errors import ConfigError
+
+    (config_home / "config.toml").write_text("not [ valid toml", encoding="utf-8")
+    with pytest.raises(ConfigError, match="not valid TOML"):
+        cfg.read_raw()
+
+
+def test_env_override_ntfy_server(config_home, monkeypatch):
+    monkeypatch.setenv("TEILAUTO_NOTIFY_NTFY_SERVER", "https://ntfy.example.org")
+    assert cfg.load_settings().ntfy_server == "https://ntfy.example.org"
