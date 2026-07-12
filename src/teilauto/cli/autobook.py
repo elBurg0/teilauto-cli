@@ -58,6 +58,9 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
     min_fuel = settings.min_fuel if min_fuel is None else min_fuel
     interval = settings.interval_sec if interval is None else interval
 
+    if as_json and not yes:
+        raise click.UsageError("--json is non-interactive; add --yes to confirm the criteria.")
+
     if app.token is None and not dry_run:
         raise AuthRequiredError()
 
@@ -97,8 +100,6 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
 
         def fetch():
             start, end = booking_window()
-            if end <= start:
-                raise NoMatchError("--until time has already passed.")
             return find_cars(
                 client, lat=lat, lng=lng, radius_m=radius_m,
                 start=start, end=end, min_fuel=min_fuel,
@@ -109,23 +110,47 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
         if not app.quiet and not as_json:
             console.print(f"Hunting for a car... polling every {interval}s. Ctrl-C to stop.")
 
-        failed_ids: set[str] = set()
+        def give_up(message: str) -> None:
+            send_all(notifiers, "Autobook gave up", f"⏰ {message}")
+            finish("no_match", None, None, None)
+            raise NoMatchError(message)
+
+        def deadline_passed() -> bool:
+            now = datetime.now().astimezone()
+            if deadline is not None and now >= deadline:
+                give_up("Deadline reached — no matching car was booked.")
+            if fixed_end is not None and now >= fixed_end:
+                give_up("The --until time has passed — nothing left to book.")
+            return False
+
+        deadline_passed()
+
+        failed_counts: dict[str, int] = {}
         for tick in watch(fetch, interval=interval, sleeper=time.sleep):
             stamp = datetime.now().astimezone().strftime("%H:%M:%S")
             if tick.error:
-                if not as_json:
-                    err_console.print(f"[dim]{stamp}[/dim] [red]poll failed:[/red] {tick.error}")
+                err_console.print(f"[dim]{stamp}[/dim] [red]poll failed:[/red] {tick.error}")
             else:
                 if not app.quiet and not as_json:
                     console.print(
                         f"[dim]{stamp}[/dim] {tick.nearby} nearby, {tick.available} bookable"
                     )
-                retries = [ca for ca in tick.retryable if ca.car.id in failed_ids]
+                retries = [
+                    ca for ca in tick.retryable
+                    if failed_counts.get(ca.car.id, 0) > 0
+                    and failed_counts.get(ca.car.id, 0) < 3
+                ]
                 for ca in list(tick.new) + retries:
                     start, end = booking_window()
                     price = None
                     with suppress(TeilautoError):
                         price = client.price(ca.car.id, start, end)
+                    if max_price is not None and (price is None or price.total is None):
+                        err_console.print(
+                            f"  [yellow]skip[/yellow] {describe(ca)} "
+                            f"(price unknown, --max-price set)"
+                        )
+                        continue
                     if (
                         max_price is not None
                         and price is not None
@@ -152,12 +177,18 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
                         return
                     try:
                         booking = client.create_booking(ca.car.id, start, end)
+                    except AuthRequiredError:
+                        raise
                     except TeilautoError as exc:
-                        failed_ids.add(ca.car.id)
-                        if not as_json:
+                        failed_counts[ca.car.id] = failed_counts.get(ca.car.id, 0) + 1
+                        err_console.print(
+                            f"  [yellow]booking failed (car taken?):[/yellow] {exc} — "
+                            f"continuing"
+                        )
+                        if failed_counts[ca.car.id] >= 3:
                             err_console.print(
-                                f"  [yellow]booking failed (car taken?):[/yellow] {exc} — "
-                                f"continuing"
+                                f"  [yellow]giving up on[/yellow] {describe(ca)} "
+                                f"after 3 failed booking attempts"
                             )
                         continue
                     message = (
@@ -168,8 +199,4 @@ def autobook_cmd(app, lat, lng, radius_m, duration_text, until_text, min_fuel,
                     send_all(notifiers, "Car booked", f"🚗 {message}")
                     finish("booked", ca, booking, price)
                     return
-            if deadline is not None and datetime.now().astimezone() >= deadline:
-                send_all(notifiers, "Autobook gave up",
-                         "⏰ No matching car became available before the deadline.")
-                finish("no_match", None, None, None)
-                raise NoMatchError("Deadline reached — no matching car was booked.")
+            deadline_passed()
