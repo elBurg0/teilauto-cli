@@ -12,6 +12,7 @@ class WatchTick:
     nearby: int
     available: int
     new: tuple[CarAvailability, ...]
+    retryable: tuple[CarAvailability, ...] = ()
     error: str | None = None
 
 
@@ -43,5 +44,10 @@ def watch(
             new = tuple(ca for ca in available if ca.car.id not in seen)
             seen = current
             sleep = interval
-            yield WatchTick(nearby=len(cars), available=len(available), new=new)
+            yield WatchTick(
+                nearby=len(cars),
+                available=len(available),
+                new=new,
+                retryable=tuple(available),
+            )
         sleeper(sleep)
