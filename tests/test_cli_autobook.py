@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from datetime import datetime, timedelta
 
 import httpx
 
@@ -63,12 +64,15 @@ def test_autobook_respects_max_price(runner, logged_in, respx_mock, monkeypatch,
     _mock_search(respx_mock, poi_json, proposals_json)
     respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(200, json=prices_json))
     post = respx_mock.post(f"{BASE_URL}/bookings")
+    deadline = (datetime.now().astimezone() + timedelta(seconds=2)).isoformat()
     result = runner.invoke(
         cli,
-        ["autobook", "--for", "1h", "--yes", "--max-price", "2.00", "--deadline", "now"],
+        ["autobook", "--for", "1h", "--yes", "--max-price", "2.00", "--deadline", deadline],
     )
     assert not post.called
     assert result.exception is not None  # NoMatchError via runner
+    price_calls = [c for c in respx_mock.calls if c.request.url.path.endswith("/prices")]
+    assert price_calls  # the candidate loop actually executed
 
 
 def test_autobook_keeps_polling_when_booking_races(runner, logged_in, respx_mock, monkeypatch,
@@ -104,11 +108,14 @@ def test_autobook_max_price_fails_closed_on_price_error(runner, logged_in, monke
     _mock_search(respx_mock, poi_json, proposals_json)
     respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(500))
     post = respx_mock.post(f"{BASE_URL}/bookings")
+    deadline = (datetime.now().astimezone() + timedelta(seconds=2)).isoformat()
     result = runner.invoke(
-        cli, ["autobook", "--for", "1h", "--yes", "--max-price", "10", "--deadline", "now"]
+        cli, ["autobook", "--for", "1h", "--yes", "--max-price", "10", "--deadline", deadline]
     )
     assert not post.called
     assert result.exception is not None  # deadline give-up, exit 2
+    price_calls = [c for c in respx_mock.calls if c.request.url.path.endswith("/prices")]
+    assert price_calls  # the candidate loop actually executed
 
 
 def test_autobook_gives_up_on_permanently_failing_car(runner, logged_in, monkeypatch,
@@ -120,7 +127,6 @@ def test_autobook_gives_up_on_permanently_failing_car(runner, logged_in, monkeyp
     post = respx_mock.post(f"{BASE_URL}/bookings").mock(
         return_value=httpx.Response(400, json={"message": "nope"})
     )
-    from datetime import datetime, timedelta
     deadline = (datetime.now().astimezone() + timedelta(seconds=2)).isoformat()
     result = runner.invoke(
         cli, ["autobook", "--for", "1h", "--yes", "--deadline", deadline]
