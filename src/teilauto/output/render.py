@@ -7,7 +7,7 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
-from teilauto.api.models import Car, Unavailability
+from teilauto.api.models import Booking, Car, Unavailability
 from teilauto.services.availability import CarAvailability
 
 console = Console()
@@ -82,4 +82,19 @@ def unavailability_table(items: list[Unavailability]) -> Table:
     table.add_column("Until")
     for item in items:
         table.add_row(local_time(item.start), local_time(item.end))
+    return table
+
+
+def bookings_table(bookings: list[Booking]) -> Table:
+    table = Table(title="Bookings", header_style="bold")
+    for column in ("ID", "Car", "From", "Until", "State"):
+        table.add_column(column)
+    for booking in bookings:
+        table.add_row(
+            booking.id,
+            booking.bookee_id or "—",
+            local_time(booking.start),
+            local_time(booking.end),
+            booking.state or "—",
+        )
     return table

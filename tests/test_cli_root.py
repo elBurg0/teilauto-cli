@@ -39,7 +39,6 @@ def test_resolve_window_bad_time_is_bad_parameter():
         resolve_window("banana", None, None, default_minutes=30)
 
 
-@pytest.mark.xfail(reason="bookings group lands in Task 15", strict=False)
 def test_main_renders_teilauto_error(monkeypatch, capsys, isolated_config):
     monkeypatch.setattr("sys.argv", ["teilauto", "bookings", "list"])
     with pytest.raises(SystemExit) as exc_info:
