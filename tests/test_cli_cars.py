@@ -68,3 +68,11 @@ def test_price_json(runner, isolated_config, respx_mock, prices_json):
     assert data["total"] == 4.9
     assert data["currency"] == "EUR"
     assert data["car_id"] == "111"
+
+
+def test_price_unknown_hints_login(runner, isolated_config, respx_mock):
+    respx_mock.get(f"{BASE_URL}/prices").mock(return_value=httpx.Response(200, json=[]))
+    result = runner.invoke(cli, ["price", "111", "--for", "30m"])
+    assert result.exit_code == 0
+    assert "unknown" in result.output
+    assert "auth login" in result.output

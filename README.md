@@ -61,7 +61,8 @@ What it does:
    newly available in your window.
 3. For each candidate, fetches the live price. If `--max-price` is set and the
    price can't be determined, the car is **skipped** — it fails closed rather
-   than risking an over-budget booking.
+   than risking an over-budget booking. (Use `--max-price` only when logged in;
+   unauthenticated price lookups return empty data.)
 4. Books the first car that passes, notifies you, and exits immediately.
    If a booking attempt fails (someone beat you to it), that car is retried up
    to 3 times before autobook gives up on it and moves on.
@@ -111,7 +112,7 @@ teilauto notify test
 | `teilauto auth logout` | Delete the stored token. |
 | `teilauto cars list` | List cars near a location, closest first. |
 | `teilauto cars show CAR_ID` | Car detail plus blocked time ranges (next 24h by default). |
-| `teilauto price CAR_ID` | Price of booking a car for a time window. |
+| `teilauto price CAR_ID` | Price of booking a car for a time window. Login required for real prices; unauthenticated requests return "unknown". |
 | `teilauto bookings list` | Your bookings (upcoming only by default). |
 | `teilauto bookings show BOOKING_ID` | One booking in detail. |
 | `teilauto bookings create CAR_ID` | Book a car for a time window (asks for confirmation). |

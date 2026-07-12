@@ -42,3 +42,7 @@ def price(app, car_id, start_text, duration_text, until_text, as_json) -> None:
             },
         )
     )
+    if result.total is None and app.token is None:
+        console.print(
+            "[dim]Price data may require a login — run `teilauto auth login` and retry.[/dim]"
+        )
