@@ -1,0 +1,62 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "teilauto-cli"
+version = "0.1.0"
+description = "Modern CLI for teilauto/CityFlitzer carsharing - search cars, check prices, manage bookings, and auto-book with notifications."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.10"
+authors = [{ name = "Max Boettinger", email = "max@bttngr.de" }]
+keywords = ["teilauto", "cityflitzer", "carsharing", "cli", "leipzig"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: End Users/Desktop",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Utilities",
+]
+dependencies = [
+  "click>=8.1",
+  "rich>=13.0",
+  "rich-click>=1.8",
+  "httpx>=0.27",
+  "keyring>=24.0",
+  "platformdirs>=4.0",
+  "tomli>=2.0; python_version < '3.11'",
+  "tomli-w>=1.0",
+]
+
+[project.scripts]
+teilauto = "teilauto.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/maxboettinger/teilauto-cli"
+Repository = "https://github.com/maxboettinger/teilauto-cli"
+Issues = "https://github.com/maxboettinger/teilauto-cli/issues"
+Changelog = "https://github.com/maxboettinger/teilauto-cli/blob/main/CHANGELOG.md"
+
+[dependency-groups]
+dev = ["pytest>=8", "respx>=0.22", "ruff>=0.6"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/teilauto"]
