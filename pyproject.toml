@@ -60,3 +60,4 @@ testpaths = ["tests"]
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/teilauto"]
+exclude = ["**/docs.md"]

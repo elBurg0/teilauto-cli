@@ -29,6 +29,6 @@ Data path for the flagship flow: `cli/autobook.py` → `services/watcher.watch()
 - Every module starts with `from __future__ import annotations`; the package supports Python 3.10+ (hence `tomli` fallback in core and `timezone.utc` instead of `datetime.UTC`).
 - All timestamps cross the API boundary as UTC `...T...Z` strings (`iso_utc` in @/src/teilauto/api/client.py); models keep them as raw strings; only @/src/teilauto/output/render.py localizes them for humans.
 - Exit codes are a stable contract: 0 ok, 1 generic/API/config error, 2 usage or autobook no-match, 3 auth required, 4 not found.
-- The design spec lives at @/docs/superpowers/specs/2026-07-12-teilauto-cli-design.md and the task-by-task implementation plan at @/docs/superpowers/plans/2026-07-12-teilauto-cli.md.
+- The design spec lives at @/docs/superpowers/specs/2026-07-12-teilauto-cli-design.md and the task-by-task implementation plan at @/docs/superpowers/plans/2026-07-12-teilauto-cli.md; `docs/` is gitignored/local-only (see @/docs.md), so these paths only resolve on a checkout that still has the local working artifacts.
 
 Created and maintained by Nori.
