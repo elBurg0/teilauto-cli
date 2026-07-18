@@ -29,7 +29,7 @@ Entry point: `[project.scripts] teilauto = "teilauto.cli:main"` in @/pyproject.t
 ### Things to Know
 
 - The API is unofficial and undocumented; the `x-api-key` committed in @/src/teilauto/api/client.py is the public app identifier from the official site's frontend JS, not a secret. The README's "Responsible use" section frames the polling etiquette (120 s default interval) that the config defaults encode.
-- `autobook` spends real money; its safety rails (confirmation, `--dry-run`, fail-closed `--max-price`, retry cap, deadlines) are detailed in @/src/teilauto/cli/docs.md.
+- `autobook` spends real money; its safety rails (confirmation, `--dry-run`, retry cap, deadlines) are detailed in @/src/teilauto/cli/docs.md. It deliberately has no price filter — CityFlitzer pricing is usage-based and uniform across cars, not tied to the requested booking window.
 - The `.superpowers/sdd/` directory holds per-task briefs/reports and review diffs from the agent-driven build process — development artifacts, not part of the package.
 - Commits follow Conventional Commits; @/CHANGELOG.md follows Keep a Changelog.
 

@@ -5,6 +5,32 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Car-type filtering now matches case-insensitively: the live API reports the
+  free-floating type as `cityflitzer`, not `cityFlitzer`, which made
+  `cars list` and `autobook` match zero cars.
+- Price parsing now understands the live `/prices` schema
+  (`priceItems[].priceIncl.amount` + `code`); the legacy `gross`/`currency`
+  shape remains as a fallback. Previously every price came back "unknown".
+
+### Changed
+
+- `autobook --for` is now optional and defaults to `1h`. CityFlitzer bills
+  actual usage (first started hour in full, then 15-minute steps, plus
+  kilometers) and the backend rewrites the booking end to the real trip end,
+  so the window is a formality that only affects the availability check.
+
+### Removed
+
+- `autobook --max-price` and the per-candidate price lookup. The API prices
+  CityFlitzer bookings as a fixed 48-hour worst case regardless of the
+  requested window, and all CityFlitzers share one tariff, so a price cap
+  could never distinguish candidates. The autobook `--json` result no longer
+  contains a `price` field.
+
 ## [0.1.0] - 2026-07-12
 
 Initial public release.

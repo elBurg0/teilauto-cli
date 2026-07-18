@@ -20,7 +20,8 @@ CLI tests invoke `cli` (not `main()`) via `CliRunner` and assert on exit codes, 
 
 - The bookings fixture is pinned to far-future dates (commit `2cdfa16`) so the `bookings list` past-filter tests do not depend on the real clock.
 - Usage-error assertions read `result.stderr` because click ≥ 8.2 prints usage errors there.
-- Autobook `--max-price` tests were specifically reworked (commit `46b0d21`) to actually reach the polling loop rather than fail earlier at validation — a reminder that autobook has several pre-loop guard clauses that can short-circuit a test unintentionally.
+- Autobook has no `--max-price` option and never calls `/prices`; `test_cli_autobook.py` asserts this directly (`--max-price` is rejected as an unknown option, and the booked/dry-run JSON has no `price` key) and asserts the default 1h window is what gets POSTed when neither `--for` nor `--until` is given. A reminder that autobook has several pre-loop guard clauses (auth, criteria confirmation, deadline checks) that can short-circuit a test unintentionally if it's meant to reach the polling loop.
+- `test_models.py` covers both `Price.from_api` shapes: the live `priceIncl`/`code` schema and the legacy `gross`/`currency` fallback. `test_availability.py` covers `find_cars` matching a lowercase `"cityflitzer"` bookee type against the default `cityFlitzer` filter.
 - Since `main()` is bypassed, tests asserting `TeilautoError` behavior check `result.exception` / exit codes from click itself, not the human error rendering done in @/src/teilauto/cli/__init__.py.
 
 Created and maintained by Nori.

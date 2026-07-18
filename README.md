@@ -49,28 +49,31 @@ teilauto bookings create 111 --for 1h       # book the VW Polo for an hour
 criteria — no manual refreshing, no lost race against other members.
 
 ```bash
-teilauto autobook --for 45m --radius 800 --max-price 10 --deadline 18:00
+teilauto autobook --radius 800 --deadline 18:00
 ```
 
 What it does:
 
-1. Prints the criteria (location, duration, min fuel, max price, deadline) and
+1. Prints the criteria (location, booking window, min fuel, deadline) and
    asks you to confirm — skip with `--yes` (required if you also pass `--json`,
    since JSON mode can't prompt).
 2. Polls `cars list` every `--interval` seconds (120s by default) for cars
    newly available in your window.
-3. For each candidate, fetches the live price. If `--max-price` is set and the
-   price can't be determined, the car is **skipped** — it fails closed rather
-   than risking an over-budget booking. (Use `--max-price` only when logged in;
-   unauthenticated price lookups return empty data.)
-4. Books the first car that passes, notifies you, and exits immediately.
+3. Books the first match, notifies you, and exits immediately.
    If a booking attempt fails (someone beat you to it), that car is retried up
    to 3 times before autobook gives up on it and moves on.
-5. Give up early with `--until` (also usable as the booking's fixed end time)
+4. Give up early with `--until` (also usable as the booking's fixed end time)
    or `--deadline` — autobook exits with code 2 once the deadline passes with
    nothing booked.
-6. `--dry-run` does everything except the actual booking (no login required)
+5. `--dry-run` does everything except the actual booking (no login required)
    — use it to sanity-check your criteria first.
+
+**About the booking window:** CityFlitzer bills actual usage — the first
+started hour in full, then 15-minute steps, plus kilometers — and the booked
+end time is rewritten to when you actually end the trip. The window `--for`
+sets (default: 1h) is a formality the API requires and only affects the
+availability check, so you neither overpay by booking long nor need to extend
+a short booking.
 
 This spends real money on your real account the moment a match is found.
 There's an inherent race: someone else's app can win the same car between your
@@ -112,7 +115,7 @@ teilauto notify test
 | `teilauto auth logout` | Delete the stored token. |
 | `teilauto cars list` | List cars near a location, closest first. |
 | `teilauto cars show CAR_ID` | Car detail plus blocked time ranges (next 24h by default). |
-| `teilauto price CAR_ID` | Price of booking a car for a time window. Login required for real prices; unauthenticated requests return "unknown". |
+| `teilauto price CAR_ID` | Price of booking a car for a time window. Login required for real prices; unauthenticated requests return "unknown". For CityFlitzer the API always prices a fixed 48h worst case regardless of the requested window — actual billing follows usage. |
 | `teilauto bookings list` | Your bookings (upcoming only by default). |
 | `teilauto bookings show BOOKING_ID` | One booking in detail. |
 | `teilauto bookings create CAR_ID` | Book a car for a time window (asks for confirmation; skip with `--yes`, required if you also pass `--json`). |

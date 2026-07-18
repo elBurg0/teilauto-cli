@@ -22,7 +22,7 @@ Layering, top to bottom — imports only ever point downward, and two invariants
 | @/src/teilauto/api | `CantamenClient` (httpx, retries, error mapping), frozen models, `TeilautoError` hierarchy |
 | @/src/teilauto/core | config (defaults ← file ← env), secret/token store, time parsing, haversine |
 
-Data path for the flagship flow: `cli/autobook.py` → `services/watcher.watch()` polling `services/availability.find_cars()` → `api/client.CantamenClient` (`/pointsofinterest` + `/bookingproposals`, then `/prices` and `POST /bookings`) → notification fan-out via `services/notify` → exit code from `api/errors.py` via `cli.main()`.
+Data path for the flagship flow: `cli/autobook.py` → `services/watcher.watch()` polling `services/availability.find_cars()` → `api/client.CantamenClient` (`/pointsofinterest` + `/bookingproposals`, then `POST /bookings`) → notification fan-out via `services/notify` → exit code from `api/errors.py` via `cli.main()`. `autobook` deliberately never calls `/prices` — see @/src/teilauto/cli/docs.md and @/src/teilauto/api/docs.md for why.
 
 ### Things to Know
 
