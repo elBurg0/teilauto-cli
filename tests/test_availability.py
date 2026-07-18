@@ -113,6 +113,19 @@ def test_radius_drops_distant_car(respx_mock):
     assert items == []
 
 
+def test_car_type_matches_case_insensitively(respx_mock):
+    # the live API spells the type "cityflitzer"; fixtures and older API responses
+    # say "cityFlitzer" — both must match the default filter
+    bookee = _bookee("live")
+    bookee["bookeeType"] = {"name": "cityflitzer"}
+    poi = _poi([_place("p1", "Somewhere", 51.3456, 12.3822, [bookee])])
+    respx_mock.get(f"{BASE_URL}/pointsofinterest").mock(return_value=httpx.Response(200, json=poi))
+    respx_mock.get(f"{BASE_URL}/bookingproposals").mock(return_value=httpx.Response(200, json=[]))
+    with CantamenClient() as client:
+        items = find_cars(client, start=START, end=END, **HOME)
+    assert [ca.car.id for ca in items] == ["live"]
+
+
 def test_unknown_fuel_counts_as_zero(respx_mock):
     poi = _poi([_place("p1", "Somewhere", 51.3456, 12.3822, [_bookee("nofuel", fuel=None)])])
     respx_mock.get(f"{BASE_URL}/pointsofinterest").mock(return_value=httpx.Response(200, json=poi))

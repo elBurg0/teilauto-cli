@@ -89,3 +89,26 @@ def test_price_falls_back_to_top_level_gross():
     price = Price.from_api({"gross": {"amount": 250, "currency": "EUR"}})
     assert price.total == 2.50
     assert price.currency == "EUR"
+
+
+def test_price_parses_live_price_incl_items():
+    # the live /prices response carries priceIncl/code, not gross/currency
+    price = Price.from_api(
+        {
+            "priceItems": [
+                {
+                    "priceIncl": {"amount": 5600, "code": "EUR"},
+                    "vat": {"amount": 894, "code": "EUR"},
+                    "costTypeName": "Zeitkosten",
+                    "costCategory": "DRIVING_TIME",
+                },
+                {
+                    "priceIncl": {"amount": 400, "code": "EUR"},
+                    "costTypeName": "Kilometerkosten",
+                    "costCategory": "DISTANCE",
+                },
+            ]
+        }
+    )
+    assert price.total == 60.00
+    assert price.currency == "EUR"

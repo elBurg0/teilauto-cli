@@ -64,20 +64,26 @@ class Price:
 
     @classmethod
     def from_api(cls, data: dict) -> Price:
+        # the live API sends priceIncl/code; gross/currency is the legacy shape
+        def amount_of(container: dict) -> tuple[int, str | None] | None:
+            for gross in (container.get("priceIncl"), container.get("gross")):
+                if gross and "amount" in gross:
+                    return gross["amount"], gross.get("code") or gross.get("currency")
+            return None
+
         total_cents = 0
         currency: str | None = None
         found = False
         for item in data.get("priceItems") or []:
-            gross = item.get("gross") or {}
-            if "amount" in gross:
-                total_cents += gross["amount"]
-                currency = gross.get("currency") or currency
+            parsed = amount_of(item)
+            if parsed:
+                total_cents += parsed[0]
+                currency = parsed[1] or currency
                 found = True
         if not found:
-            gross = data.get("gross") or {}
-            if "amount" in gross:
-                total_cents = gross["amount"]
-                currency = gross.get("currency")
+            parsed = amount_of(data)
+            if parsed:
+                total_cents, currency = parsed
                 found = True
         return cls(total=total_cents / 100 if found else None, currency=currency, raw=data)
 

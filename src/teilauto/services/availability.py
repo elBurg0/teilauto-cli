@@ -41,7 +41,8 @@ def find_cars(
     }
     items: list[CarAvailability] = []
     for car in cars:
-        if car_type is not None and car.car_type != car_type:
+        # the API has spelled the type both "cityFlitzer" and "cityflitzer"
+        if car_type is not None and (car.car_type or "").casefold() != car_type.casefold():
             continue
         if (car.fuel or 0) < min_fuel:
             continue
