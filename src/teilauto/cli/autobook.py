@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import time
-from contextlib import suppress
 from datetime import datetime
 
 import rich_click as click
@@ -15,6 +14,8 @@ from teilauto.services.availability import CarAvailability, describe, find_cars
 from teilauto.services.notify import build_notifiers, send_all
 from teilauto.services.watcher import watch
 
+DEFAULT_DURATION = "1h"
+
 
 @click.command("autobook")
 @location_options
@@ -23,7 +24,10 @@ from teilauto.services.watcher import watch
     "duration_text",
     default=None,
     metavar="DURATION",
-    help="Booking duration once a car is found, e.g. '45m', '2h'.",
+    help=(
+        f"Booking window sent to the API (default: {DEFAULT_DURATION}). CityFlitzer bills "
+        "actual usage, so this only affects the availability check, not the price."
+    ),
 )
 @click.option(
     "--until",
@@ -38,13 +42,6 @@ from teilauto.services.watcher import watch
     default=None,
     metavar="PERCENT",
     help="Ignore cars below this fuel level (default: config).",
-)
-@click.option(
-    "--max-price",
-    type=float,
-    default=None,
-    metavar="EUR",
-    help="Skip cars whose booking would cost more than this.",
 )
 @click.option(
     "--deadline",
@@ -74,25 +71,28 @@ def autobook_cmd(
     duration_text,
     until_text,
     min_fuel,
-    max_price,
     deadline_text,
     interval,
     dry_run,
     yes,
     as_json,
 ) -> None:
-    """Book the closest matching CityFlitzer the moment one becomes available.
+    """Book the closest CityFlitzer the moment one becomes available.
 
     This spends real money on your real account. Safety rails: a criteria
-    confirmation before starting, --dry-run, --max-price, and an explicit
-    booking duration. Exits as soon as a car is booked.
+    confirmation before starting, --dry-run, and an optional --deadline.
+
+    CityFlitzer billing follows actual usage (first hour in full, then
+    15-minute steps, plus kilometers) — the booked window is a formality
+    the API requires and is rewritten to the real end when you finish the
+    trip. Exits as soon as a car is booked.
     """
     settings = app.settings
     lat, lng, radius_m = resolve_location(settings, lat, lng, radius_m)
     if duration_text and until_text:
         raise click.UsageError("--for and --until are mutually exclusive.")
     if not duration_text and not until_text:
-        raise click.UsageError("Give the booking length via --for (e.g. --for 1h) or --until.")
+        duration_text = DEFAULT_DURATION
     try:
         duration = parse_duration(duration_text) if duration_text else None
         fixed_end = parse_time(until_text) if until_text else None
@@ -120,9 +120,8 @@ def autobook_cmd(
                 "Autobook criteria",
                 {
                     "location": f"{lat}, {lng} (±{radius_m} m)",
-                    "duration": duration_text or f"until {until_text}",
+                    "window": duration_text or f"until {until_text}",
                     "min fuel": f"{min_fuel:.0f}%",
-                    "max price": f"{max_price:.2f} EUR" if max_price is not None else "—",
                     "deadline": deadline_text or "—",
                     "mode": "DRY RUN" if dry_run else "books immediately",
                 },
@@ -135,14 +134,13 @@ def autobook_cmd(
         end = fixed_end if fixed_end is not None else start + duration
         return start, end
 
-    def finish(status: str, ca: CarAvailability | None, booking, price) -> None:
+    def finish(status: str, ca: CarAvailability | None, booking) -> None:
         if as_json:
             print_json(
                 {
                     "status": status,
                     "car": ca.car if ca else None,
                     "booking": booking,
-                    "price": price,
                 }
             )
 
@@ -172,7 +170,7 @@ def autobook_cmd(
         def give_up(message: str) -> None:
             for error in send_all(notifiers, "Autobook gave up", f"⏰ {message}"):
                 err_console.print(f"[red]notify failed:[/red] {error}")
-            finish("no_match", None, None, None)
+            finish("no_match", None, None)
             raise NoMatchError(message)
 
         def deadline_passed() -> None:
@@ -201,39 +199,13 @@ def autobook_cmd(
                 ]
                 for ca in list(tick.new) + retries:
                     start, end = booking_window()
-                    price = None
-                    with suppress(TeilautoError):
-                        price = client.price(ca.car.id, start, end)
-                    if max_price is not None and (price is None or price.total is None):
-                        err_console.print(
-                            f"  [yellow]skip[/yellow] {describe(ca)} "
-                            f"(price unknown, --max-price set)"
-                        )
-                        continue
-                    if (
-                        max_price is not None
-                        and price is not None
-                        and price.total is not None
-                        and price.total > max_price
-                    ):
-                        if not as_json:
-                            console.print(
-                                f"  [yellow]skip[/yellow] {describe(ca)} "
-                                f"({price.total:.2f} {price.currency} > max)"
-                            )
-                        continue
-                    price_line = (
-                        f" for {price.total:.2f} {price.currency}"
-                        if price and price.total is not None
-                        else ""
-                    )
                     if dry_run:
-                        message = f"Would have booked: {describe(ca)}{price_line}"
+                        message = f"Would have booked: {describe(ca)}"
                         if not as_json:
                             console.print(f"[green]✓ DRY RUN[/green] {message}")
                         for error in send_all(notifiers, "teilauto dry-run", f"🤖 {message}"):
                             err_console.print(f"[red]notify failed:[/red] {error}")
-                        finish("dry_run", ca, None, price)
+                        finish("dry_run", ca, None)
                         return
                     try:
                         booking = client.create_booking(ca.car.id, start, end)
@@ -250,11 +222,11 @@ def autobook_cmd(
                                 f"after 3 failed booking attempts"
                             )
                         continue
-                    message = f"Booked {describe(ca)}{price_line} — booking id {booking.id}"
+                    message = f"Booked {describe(ca)} — booking id {booking.id}"
                     if not as_json:
                         console.print(f"[green]✓ Booked![/green] {message}")
                     for error in send_all(notifiers, "Car booked", f"🚗 {message}"):
                         err_console.print(f"[red]notify failed:[/red] {error}")
-                    finish("booked", ca, booking, price)
+                    finish("booked", ca, booking)
                     return
             deadline_passed()
