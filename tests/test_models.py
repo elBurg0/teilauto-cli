@@ -15,6 +15,7 @@ from teilauto.api.models import (
     TokenInfo,
     Unavailability,
     cars_from_poi,
+    unavailabilities_from_api,
 )
 
 
@@ -68,9 +69,42 @@ def test_booking_from_api(bookings_json):
     assert b.start == "2099-01-01T10:00:00.000Z"
 
 
-def test_unavailability_from_api(unavailabilities_json):
-    u = Unavailability.from_api(unavailabilities_json[0])
-    assert u.start == "2026-07-12T18:00:00.000Z"
+def test_booking_from_live_shape(bookings_live_json):
+    b = Booking.from_api(bookings_live_json[0])
+    assert b.bookee_id == "333"
+    assert b.car_name == "cityflitzer-001 (L-CF 1111)"
+    assert b.car_label == "cityflitzer-001 (L-CF 1111) [333]"
+    assert b.state == "NOT_DELIVERED"
+
+
+def test_booking_cancelled_state(bookings_live_json):
+    assert Booking.from_api(bookings_live_json[1]).state == "CANCELLED"
+
+
+def test_booking_without_car_info():
+    assert Booking.from_api({"id": "x"}).car_label == "—"
+
+
+def test_unavailability_from_api():
+    u = Unavailability.from_api({"timeRange": {"start": "s", "end": "e"}})
+    assert (u.start, u.end) == ("s", "e")
+
+
+def test_unavailabilities_flatten_live_shape(unavailabilities_json):
+    items = unavailabilities_from_api(unavailabilities_json)
+    assert [(u.start, u.end) for u in items] == [
+        ("2026-07-12T18:00:00.000Z", "2026-07-12T20:00:00.000Z"),
+        ("2026-07-13T07:00:00+02:00", "2026-07-13T12:30:00+02:00"),
+    ]
+
+
+def test_unavailabilities_flat_shape_still_supported():
+    items = unavailabilities_from_api([{"timeRange": {"start": "s", "end": "e"}}])
+    assert [(u.start, u.end) for u in items] == [("s", "e")]
+
+
+def test_unavailabilities_empty_group():
+    assert unavailabilities_from_api([{"unavailabilityTimeRanges": []}]) == []
 
 
 def test_token_info(token_json):

@@ -90,7 +90,7 @@ def bookings_table(bookings: list[Booking]) -> Table:
     for booking in bookings:
         table.add_row(
             booking.id,
-            booking.bookee_id or "—",
+            booking.car_label,
             local_time(booking.start),
             local_time(booking.end),
             booking.state or "—",

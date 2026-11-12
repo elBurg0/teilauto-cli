@@ -1,3 +1,8 @@
 [
-  {"timeRange": {"start": "2026-07-12T18:00:00.000Z", "end": "2026-07-12T20:00:00.000Z"}}
+  {"unavailabilityTimeRanges": [
+    {"id": "U1", "reason": "GENERAL",
+     "timeRange": {"start": "2026-07-12T18:00:00.000Z", "end": "2026-07-12T20:00:00.000Z"}},
+    {"id": "U2", "reason": "GENERAL",
+     "timeRange": {"start": "2026-07-13T07:00:00+02:00", "end": "2026-07-13T12:30:00+02:00"}}
+  ]}
 ]

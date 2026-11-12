@@ -95,20 +95,36 @@ class Booking:
     start: str | None
     end: str | None
     state: str | None
+    car_name: str | None = None
     raw: dict = field(default_factory=dict)
 
     @classmethod
     def from_api(cls, data: dict) -> Booking:
         time_range = data.get("timeRange") or {}
-        bookee_id = data.get("bookeeId")
+        bookee = data.get("bookee") or {}
+        # bookee.id is a per-booking virtual id ("B118_…"), not the car id
+        bookee_id = data.get("bookeeId") or bookee.get("actualBookeeId")
+        name = bookee.get("name")
+        plate = bookee.get("displayName") or bookee.get("licenseNumber")
+        car_name = f"{name} ({plate})" if name and plate else name or plate
+        state = data.get("state") or data.get("bookingState")
+        if not state and data.get("cancelled"):
+            state = "CANCELLED"
         return cls(
             id=str(data.get("id")),
             bookee_id=str(bookee_id) if bookee_id is not None else None,
             start=time_range.get("start"),
             end=time_range.get("end"),
-            state=data.get("state") or data.get("bookingState"),
+            state=state or data.get("billingState"),
+            car_name=car_name,
             raw=data,
         )
+
+    @property
+    def car_label(self) -> str:
+        if self.car_name and self.bookee_id:
+            return f"{self.car_name} [{self.bookee_id}]"
+        return self.car_name or self.bookee_id or "—"
 
 
 @dataclass(frozen=True)
@@ -120,6 +136,17 @@ class Unavailability:
     def from_api(cls, data: dict) -> Unavailability:
         time_range = data.get("timeRange") or data
         return cls(start=time_range.get("start"), end=time_range.get("end"))
+
+
+def unavailabilities_from_api(data: list[dict]) -> list[Unavailability]:
+    items: list[Unavailability] = []
+    for entry in data:
+        nested = entry.get("unavailabilityTimeRanges")
+        if nested is None:
+            items.append(Unavailability.from_api(entry))
+        else:
+            items.extend(Unavailability.from_api(r) for r in nested)
+    return items
 
 
 @dataclass(frozen=True)

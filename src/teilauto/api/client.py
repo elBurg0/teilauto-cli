@@ -16,6 +16,7 @@ from teilauto.api.models import (
     TokenInfo,
     Unavailability,
     cars_from_poi,
+    unavailabilities_from_api,
 )
 
 # Public app key baked into the buchen.teilauto.net frontend JS.
@@ -138,7 +139,7 @@ class CantamenClient:
             "/unavailabilities",
             params={"bookeeId": bookee_id, "start": iso_utc(start), "end": iso_utc(end)},
         )
-        return [Unavailability.from_api(item) for item in data or []]
+        return unavailabilities_from_api(data or [])
 
     def price(self, bookee_id: str, start: datetime, end: datetime) -> Price:
         data = self._request(
@@ -166,11 +167,11 @@ class CantamenClient:
         return TokenInfo.from_api(data)
 
     def list_bookings(self) -> list[Booking]:
-        data = self._request("GET", "/bookings")
+        data = self._request("GET", "/bookings", params={"expand": "bookee"})
         return [Booking.from_api(item) for item in data or []]
 
     def get_booking(self, booking_id: str) -> Booking:
-        data = self._request("GET", f"/bookings/{booking_id}")
+        data = self._request("GET", f"/bookings/{booking_id}", params={"expand": "bookee"})
         return Booking.from_api(data)
 
     def create_booking(self, bookee_id: str, start: datetime, end: datetime) -> Booking:

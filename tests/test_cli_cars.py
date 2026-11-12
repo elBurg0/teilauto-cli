@@ -58,6 +58,8 @@ def test_cars_show(runner, isolated_config, respx_mock, poi_json, unavailabiliti
     result = runner.invoke(cli, ["cars", "show", "111"])
     assert result.exit_code == 0
     assert "VW Polo" in result.output
+    assert "Blocked time ranges" in result.output
+    assert "2026-07-13" in result.output
 
 
 def test_price_json(runner, isolated_config, respx_mock, prices_json):

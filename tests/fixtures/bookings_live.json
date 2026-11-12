@@ -1,0 +1,12 @@
+[
+  {"id": "118_1", "provId": "118",
+   "timeRange": {"start": "2099-01-01T10:00:00+01:00", "end": "2099-01-03T10:00:00+01:00"},
+   "bookingTypes": [], "changeable": true, "cancelled": false, "billingState": "NOT_DELIVERED",
+   "distance": 0, "rideShareAllowed": false,
+   "bookee": {"id": "B118_1", "actualBookeeId": 333, "provId": "118", "name": "cityflitzer-001",
+              "displayName": "L-CF 1111", "licenseNumber": "L-CF 1111", "locality": "FLOAT"}},
+  {"id": "118_0", "provId": "118",
+   "timeRange": {"start": "2026-07-01T10:00:00+02:00", "end": "2026-07-01T10:30:00+02:00"},
+   "cancelled": true, "billingState": "DELIVERED",
+   "bookee": {"id": "B118_0", "actualBookeeId": 444, "name": "cityflitzer-002", "displayName": "L-CF 2222"}}
+]

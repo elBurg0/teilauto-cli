@@ -60,7 +60,7 @@ def show_booking(app, booking_id, as_json) -> None:
         kv_panel(
             f"Booking {booking.id}",
             {
-                "car": booking.bookee_id or "—",
+                "car": booking.car_label,
                 "from": local_time(booking.start),
                 "until": local_time(booking.end),
                 "state": booking.state or "—",

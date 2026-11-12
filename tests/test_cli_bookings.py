@@ -94,3 +94,14 @@ def test_cancel_with_yes(runner, logged_in, respx_mock):
     assert result.exit_code == 0, result.output
     assert route.called
     assert "cancelled" in result.output.lower()
+
+
+def test_bookings_list_shows_car_and_state(runner, logged_in, respx_mock, bookings_live_json):
+    route = respx_mock.get(f"{BASE_URL}/bookings").mock(
+        return_value=httpx.Response(200, json=bookings_live_json)
+    )
+    result = runner.invoke(cli, ["bookings", "list"])
+    assert result.exit_code == 0
+    assert route.calls.last.request.url.params["expand"] == "bookee"
+    assert "cityflitzer-001" in result.output
+    assert "NOT_DELIVERED" in result.output
