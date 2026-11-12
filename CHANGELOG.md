@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Price parsing now understands the live `/prices` schema
   (`priceItems[].priceIncl.amount` + `code`); the legacy `gross`/`currency`
   shape remains as a fallback. Previously every price came back "unknown".
+- `cars show` now lists blocked time ranges: the live `/unavailabilities`
+  response nests them in `unavailabilityTimeRanges`, so none were shown before.
+- `bookings list`/`show` now show the car and a state instead of "—": bookings
+  are fetched with `expand=bookee` (car id from `actualBookeeId`), and the state
+  falls back to `CANCELLED` or `billingState`.
 
 ### Changed
 

@@ -8,7 +8,7 @@ The pytest suite for the whole package: unit tests per core module (config, toke
 
 ### How it fits into the larger codebase
 
-Tests import the public surfaces documented in @/src/teilauto: the `cli` group from @/src/teilauto/cli, `CantamenClient` from @/src/teilauto/api/client.py, and the core/services modules directly. HTTP is mocked with `respx` against `BASE_URL`, using recorded-API-shaped JSON under @/tests/fixtures (POIs, proposals, prices, bookings, token, unavailabilities). CI (@/.github/workflows/ci.yml) runs the suite across three OSes and Python 3.10/3.12/3.14.
+Tests import the public surfaces documented in @/src/teilauto: the `cli` group from @/src/teilauto/cli, `CantamenClient` from @/src/teilauto/api/client.py, and the core/services modules directly. HTTP is mocked with `respx` against `BASE_URL`, using recorded-API-shaped JSON under @/tests/fixtures (POIs, proposals, prices, bookings, live-shaped bookings, token, unavailabilities). CI (@/.github/workflows/ci.yml) runs the suite across three OSes and Python 3.10/3.12/3.14.
 
 ### Core Implementation
 
@@ -19,6 +19,7 @@ CLI tests invoke `cli` (not `main()`) via `CliRunner` and assert on exit codes, 
 ### Things to Know
 
 - The bookings fixture is pinned to far-future dates (commit `2cdfa16`) so the `bookings list` past-filter tests do not depend on the real clock.
+- `bookings.json` keeps the legacy flat shape; `bookings_live.json` and `unavailabilities.json` mirror the live responses (expanded `bookee`, nested `unavailabilityTimeRanges`) with made-up data.
 - Usage-error assertions read `result.stderr` because click ≥ 8.2 prints usage errors there.
 - Autobook has no `--max-price` option and never calls `/prices`; `test_cli_autobook.py` asserts this directly (`--max-price` is rejected as an unknown option, and the booked/dry-run JSON has no `price` key) and asserts the default 1h window is what gets POSTed when neither `--for` nor `--until` is given. A reminder that autobook has several pre-loop guard clauses (auth, criteria confirmation, deadline checks) that can short-circuit a test unintentionally if it's meant to reach the polling loop.
 - `test_models.py` covers both `Price.from_api` shapes: the live `priceIncl`/`code` schema and the legacy `gross`/`currency` fallback. `test_availability.py` covers `find_cars` matching a lowercase `"cityflitzer"` bookee type against the default `cityFlitzer` filter.
